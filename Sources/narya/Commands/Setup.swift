@@ -7,7 +7,7 @@ import Foundation
 
 struct Setup: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Clone the firefox-ios repository."
+        abstract: "Clone and bootstrap the firefox-ios repository."
     )
 
     @Flag(name: .long, help: "Use SSH URL for cloning (git@github.com:...) instead of HTTPS.")
@@ -18,10 +18,20 @@ struct Setup: ParsableCommand {
 
     mutating func run() throws {
         try ToolChecker.requireGit()
+        try ToolChecker.requireNode()
+        try ToolChecker.requireNpm()
 
         let repoURL = ssh
             ? "git@github.com:mozilla-mobile/firefox-ios.git"
             : "https://github.com/mozilla-mobile/firefox-ios.git"
+
+        // Determine the clone destination
+        let cloneDir: String
+        if let location = location {
+            cloneDir = location
+        } else {
+            cloneDir = "firefox-ios"
+        }
 
         var arguments = ["clone", repoURL]
         if let location = location {
@@ -30,6 +40,31 @@ struct Setup: ParsableCommand {
 
         print("Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
         try ShellRunner.run("git", arguments: arguments)
-        print("Cloning done.")
+        print("Cloning done.\n")
+
+        // Change into the cloned repository
+        let clonePath = URL(fileURLWithPath: cloneDir).standardizedFileURL
+        guard FileManager.default.changeCurrentDirectoryPath(clonePath.path) else {
+            throw SetupError.failedToChangeDirectory(clonePath.path)
+        }
+
+        print("Running bootstrap in \(clonePath.path)...\n")
+
+        // Run bootstrap
+        var bootstrap = Bootstrap()
+        bootstrap.product = .firefox
+        bootstrap.force = false
+        try bootstrap.run()
+    }
+}
+
+enum SetupError: Error, CustomStringConvertible {
+    case failedToChangeDirectory(String)
+
+    var description: String {
+        switch self {
+        case .failedToChangeDirectory(let path):
+            return "Failed to change directory to \(path)."
+        }
     }
 }

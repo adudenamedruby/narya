@@ -25,7 +25,6 @@ struct Bootstrap: ParsableCommand {
         // Validate we're in a firefox-ios repository
         _ = try RepoDetector.requireValidRepo()
 
-        // Check required tools
         try ToolChecker.requireGit()
         try ToolChecker.requireNode()
         try ToolChecker.requireNpm()
@@ -124,11 +123,9 @@ struct Bootstrap: ParsableCommand {
         do {
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         } catch {
-            // First run failed, try again (matching original script behavior)
             print("First swift run failed, retrying...")
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         }
-        // END: Swift retry logic
 
         print("Focus bootstrap complete!")
     }
@@ -171,7 +168,6 @@ struct Bootstrap: ParsableCommand {
             try? FileManager.default.removeItem(at: scriptPath)
         }
 
-        // Download using curl
         try ShellRunner.run("curl", arguments: [
             "--proto", "=https",
             "--tlsv1.2",

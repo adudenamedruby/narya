@@ -5,6 +5,16 @@
 import Testing
 @testable import narya
 
+@Suite("Setup Tests")
+struct SetupTests {
+    @Test("SetupError.failedToChangeDirectory has correct description")
+    func failedToChangeDirectoryDescription() {
+        let error = SetupError.failedToChangeDirectory("/some/path")
+        #expect(error.description.contains("/some/path"))
+        #expect(error.description.contains("Failed to change directory"))
+    }
+}
+
 @Suite("ToolChecker Tests")
 struct ToolCheckerTests {
     @Test("ToolCheckerError.toolNotFound has correct description")
