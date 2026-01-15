@@ -7,7 +7,22 @@ import Foundation
 
 struct Bootstrap: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Bootstrap the firefox-ios repository for development."
+        abstract: "Bootstrap the firefox-ios repository for development.",
+        discussion: """
+            This command must be run from within a firefox-ios repository.
+            Use -p to specify which product to bootstrap.
+
+            For Firefox (-p firefox), bootstrap will:
+              • Remove .venv directories
+              • Download and run Nimbus FML bootstrap script
+              • Install git hooks from .githooks/
+              • Run npm install and npm run build
+
+            For Focus (-p focus), bootstrap will:
+              • Download and run Nimbus FML bootstrap script
+              • Clone shavar-prod-lists repository
+              • Build BrowserKit
+            """
     )
 
     enum Product: String, ExpressibleByArgument, CaseIterable {
@@ -15,13 +30,19 @@ struct Bootstrap: ParsableCommand {
         case focus
     }
 
-    @Option(name: [.short, .long], help: "Product to bootstrap: firefox (default) or focus.")
-    var product: Product = .firefox
+    @Option(name: [.short, .long], help: "Product to bootstrap (required): firefox or focus.")
+    var product: Product?
 
     @Flag(name: .long, help: "Force a re-build by deleting the build directory. Only applies to firefox.")
     var force = false
 
     mutating func run() throws {
+        // If no product specified, show help
+        guard let product = product else {
+            print(Bootstrap.helpMessage())
+            return
+        }
+
         // Validate we're in a firefox-ios repository
         _ = try RepoDetector.requireValidRepo()
 
