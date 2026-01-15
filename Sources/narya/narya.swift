@@ -10,7 +10,7 @@ struct Narya: ParsableCommand {
         commandName: Configuration.name,
         abstract: Configuration.shortDescription,
         version: Configuration.version,
-        subcommands: [Setup.self],
+        subcommands: [Setup.self, Bootstrap.self],
         defaultSubcommand: nil
     )
 
