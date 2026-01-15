@@ -6,7 +6,7 @@ import Foundation
 import Testing
 @testable import narya
 
-@Suite("RepoDetector Tests")
+@Suite("RepoDetector Tests", .serialized)
 struct RepoDetectorTests {
     let fileManager = FileManager.default
 
@@ -17,45 +17,46 @@ struct RepoDetectorTests {
         return tempDir
     }
 
+    func createTempGitRepo() throws -> URL {
+        let tempDir = try createTempDirectory()
+        // Initialize a git repository
+        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
+        return tempDir
+    }
+
     func cleanup(_ url: URL) {
         try? fileManager.removeItem(at: url)
     }
 
-    @Test("Finds marker file in current directory")
-    func findsMarkerInCurrentDir() throws {
+    @Test("findGitRoot returns repo root from subdirectory")
+    func findGitRootFromSubdir() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        let subDir = repoDir.appendingPathComponent("some/nested/path")
+        try fileManager.createDirectory(at: subDir, withIntermediateDirectories: true)
+
+        // Save and change directory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(subDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        let found = RepoDetector.findGitRoot()
+        #expect(found != nil)
+        #expect(found?.standardizedFileURL == repoDir.standardizedFileURL)
+    }
+
+    @Test("findGitRoot returns nil outside git repo")
+    func findGitRootOutsideRepo() throws {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
-        let markerPath = tempDir.appendingPathComponent(Configuration.markerFileName)
-        try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
+        // Save and change directory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(tempDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        let found = RepoDetector.findMarkerFile(startingAt: tempDir, searchParents: false)
-        #expect(found != nil)
-        #expect(found?.lastPathComponent == Configuration.markerFileName)
-    }
-
-    @Test("Finds marker file in parent directory")
-    func findsMarkerInParentDir() throws {
-        let parentDir = try createTempDirectory()
-        defer { cleanup(parentDir) }
-
-        let childDir = parentDir.appendingPathComponent("subdir")
-        try fileManager.createDirectory(at: childDir, withIntermediateDirectories: true)
-
-        let markerPath = parentDir.appendingPathComponent(Configuration.markerFileName)
-        try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
-
-        let found = RepoDetector.findMarkerFile(startingAt: childDir, searchParents: true)
-        #expect(found != nil)
-        #expect(found?.deletingLastPathComponent().lastPathComponent == parentDir.lastPathComponent)
-    }
-
-    @Test("Returns nil when marker not found")
-    func returnsNilWhenNotFound() throws {
-        let tempDir = try createTempDirectory()
-        defer { cleanup(tempDir) }
-
-        let found = RepoDetector.findMarkerFile(startingAt: tempDir, searchParents: false)
+        let found = RepoDetector.findGitRoot()
         #expect(found == nil)
     }
 
@@ -86,36 +87,100 @@ struct RepoDetectorTests {
 
     @Test("requireValidRepo succeeds with correct project")
     func requireValidRepoSucceeds() throws {
-        let tempDir = try createTempDirectory()
-        defer { cleanup(tempDir) }
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
 
-        let markerPath = tempDir.appendingPathComponent(Configuration.markerFileName)
+        let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
         try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
 
-        let config = try RepoDetector.requireValidRepo(startingAt: tempDir)
-        #expect(config.project == "firefox-ios")
+        // Save and change directory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        let repoInfo = try RepoDetector.requireValidRepo()
+        #expect(repoInfo.config.project == "firefox-ios")
+        #expect(repoInfo.root.standardizedFileURL == repoDir.standardizedFileURL)
+    }
+
+    @Test("requireValidRepo works from subdirectory")
+    func requireValidRepoFromSubdir() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
+        try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
+
+        let subDir = repoDir.appendingPathComponent("deeply/nested/folder")
+        try fileManager.createDirectory(at: subDir, withIntermediateDirectories: true)
+
+        // Save and change directory to subdirectory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(subDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        let repoInfo = try RepoDetector.requireValidRepo()
+        #expect(repoInfo.config.project == "firefox-ios")
+        #expect(repoInfo.root.standardizedFileURL == repoDir.standardizedFileURL)
     }
 
     @Test("requireValidRepo throws for wrong project")
     func requireValidRepoThrowsForWrongProject() throws {
-        let tempDir = try createTempDirectory()
-        defer { cleanup(tempDir) }
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
 
-        let markerPath = tempDir.appendingPathComponent(Configuration.markerFileName)
+        let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
         try "project: some-other-project".write(to: markerPath, atomically: true, encoding: .utf8)
 
+        // Save and change directory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
         #expect(throws: RepoDetectorError.self) {
-            _ = try RepoDetector.requireValidRepo(startingAt: tempDir)
+            _ = try RepoDetector.requireValidRepo()
         }
     }
 
     @Test("requireValidRepo throws when marker not found")
-    func requireValidRepoThrowsWhenNotFound() throws {
+    func requireValidRepoThrowsWhenMarkerNotFound() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        // Save and change directory (no marker file created)
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        #expect(throws: RepoDetectorError.self) {
+            _ = try RepoDetector.requireValidRepo()
+        }
+    }
+
+    @Test("requireValidRepo throws when not in git repo")
+    func requireValidRepoThrowsWhenNotInGitRepo() throws {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
+        // Save and change directory
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(tempDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
         #expect(throws: RepoDetectorError.self) {
-            _ = try RepoDetector.requireValidRepo(startingAt: tempDir)
+            _ = try RepoDetector.requireValidRepo()
         }
+    }
+
+    @Test("RepoDetectorError.notInGitRepo has correct description")
+    func notInGitRepoDescription() {
+        let error = RepoDetectorError.notInGitRepo
+        #expect(error.description.contains("git repository"))
+    }
+
+    @Test("RepoDetectorError.markerNotFound has correct description")
+    func markerNotFoundDescription() {
+        let error = RepoDetectorError.markerNotFound
+        #expect(error.description.contains(Configuration.markerFileName))
     }
 }

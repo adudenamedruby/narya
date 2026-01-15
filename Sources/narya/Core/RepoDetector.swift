@@ -9,13 +9,24 @@ struct NaryaConfig: Codable {
     let project: String
 }
 
+struct RepoInfo {
+    let config: NaryaConfig
+    let root: URL
+}
+
 enum RepoDetectorError: Error, CustomStringConvertible {
+    case notInGitRepo
     case markerNotFound
     case invalidMarkerFile(String)
     case unexpectedProject(expected: String, found: String)
 
     var description: String {
         switch self {
+        case .notInGitRepo:
+            return """
+                Not inside a git repository.
+                Run this command from within the firefox-ios directory.
+                """
         case .markerNotFound:
             return """
                 Not a narya-compatible repository.
@@ -36,30 +47,17 @@ enum RepoDetectorError: Error, CustomStringConvertible {
 enum RepoDetector {
     static let expectedProject = "firefox-ios"
 
-    static func findMarkerFile(
-        startingAt directory: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath),
-        searchParents: Bool = true
-    ) -> URL? {
-        var currentDir = directory.standardizedFileURL
-
-        while true {
-            let markerPath = currentDir.appendingPathComponent(Configuration.markerFileName)
-            if FileManager.default.fileExists(atPath: markerPath.path) {
-                return markerPath
-            }
-
-            if !searchParents {
-                break
-            }
-
-            let parent = currentDir.deletingLastPathComponent().standardizedFileURL
-            if parent.path == currentDir.path {
-                break
-            }
-            currentDir = parent
+    /// Finds the git repository root using `git rev-parse --show-toplevel`.
+    /// Returns nil if not inside a git repository.
+    static func findGitRoot() -> URL? {
+        do {
+            let output = try ShellRunner.runAndCapture("git", arguments: ["rev-parse", "--show-toplevel"])
+            let path = output.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !path.isEmpty else { return nil }
+            return URL(fileURLWithPath: path)
+        } catch {
+            return nil
         }
-
-        return nil
     }
 
     static func loadConfig(from markerPath: URL) throws -> NaryaConfig {
@@ -78,10 +76,16 @@ enum RepoDetector {
         }
     }
 
-    static func requireValidRepo(
-        startingAt directory: URL = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
-    ) throws -> NaryaConfig {
-        guard let markerPath = findMarkerFile(startingAt: directory) else {
+    /// Validates the current directory is within a firefox-ios repository.
+    /// Uses git to find the repo root, then checks for .narya.yaml marker.
+    /// Returns RepoInfo containing both the config and repo root path.
+    static func requireValidRepo() throws -> RepoInfo {
+        guard let repoRoot = findGitRoot() else {
+            throw RepoDetectorError.notInGitRepo
+        }
+
+        let markerPath = repoRoot.appendingPathComponent(Configuration.markerFileName)
+        guard FileManager.default.fileExists(atPath: markerPath.path) else {
             throw RepoDetectorError.markerNotFound
         }
 
@@ -94,6 +98,6 @@ enum RepoDetector {
             )
         }
 
-        return config
+        return RepoInfo(config: config, root: repoRoot)
     }
 }

@@ -16,14 +16,14 @@ struct FixPackages: ParsableCommand {
     )
 
     mutating func run() throws {
-        // Validate we're in a firefox-ios repository
-        _ = try RepoDetector.requireValidRepo()
+        // Validate we're in a firefox-ios repository and get repo root
+        let repo = try RepoDetector.requireValidRepo()
 
         print("Resetting Swift packages...")
-        try ShellRunner.run("swift", arguments: ["package", "reset"])
+        try ShellRunner.run("swift", arguments: ["package", "reset"], workingDirectory: repo.root)
 
         print("Resolving Swift packages...")
-        try ShellRunner.run("swift", arguments: ["package", "resolve"])
+        try ShellRunner.run("swift", arguments: ["package", "resolve"], workingDirectory: repo.root)
 
         print("Swift packages fixed!")
     }
