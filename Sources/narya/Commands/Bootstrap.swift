@@ -9,8 +9,8 @@ struct Bootstrap: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Bootstrap the firefox-ios repository for development.",
         discussion: """
-            By default, bootstraps Firefox. Use -p focus to bootstrap Focus instead,
-            or --all to bootstrap both.
+            By default, bootstraps the product specified in .narya.yaml (default_bootstrap),
+            or Firefox if not configured. Use -p to override, or --all to bootstrap both.
 
             For Firefox (-p firefox), bootstrap will:
               • Remove .venv directories
@@ -51,7 +51,16 @@ struct Bootstrap: ParsableCommand {
             try bootstrapFirefox(repoRoot: repo.root)
             try bootstrapFocus(repoRoot: repo.root)
         } else {
-            switch product ?? .firefox {
+            // Use explicit product, config default, or fallback to firefox
+            let defaultProduct: Product
+            if let configDefault = repo.config.defaultBootstrap,
+               let parsed = Product(rawValue: configDefault) {
+                defaultProduct = parsed
+            } else {
+                defaultProduct = .firefox
+            }
+
+            switch product ?? defaultProduct {
             case .firefox:
                 try bootstrapFirefox(repoRoot: repo.root)
             case .focus:

@@ -7,6 +7,12 @@ import Yams
 
 struct NaryaConfig: Codable {
     let project: String
+    let defaultBootstrap: String?
+
+    enum CodingKeys: String, CodingKey {
+        case project
+        case defaultBootstrap = "default_bootstrap"
+    }
 }
 
 struct RepoInfo {
