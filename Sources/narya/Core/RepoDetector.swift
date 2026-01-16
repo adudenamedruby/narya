@@ -24,20 +24,20 @@ enum RepoDetectorError: Error, CustomStringConvertible {
         switch self {
         case .notInGitRepo:
             return """
-                Not inside a git repository.
+                💥💍 Not inside a git repository.
                 Run this command from within the firefox-ios directory.
                 """
         case .markerNotFound:
             return """
-                Not a narya-compatible repository.
+                💥💍 Not a narya-compatible repository.
                 Expected \(Configuration.markerFileName) in project root.
                 Are you in the firefox-ios directory?
                 """
         case .invalidMarkerFile(let reason):
-            return "Invalid \(Configuration.markerFileName): \(reason)"
+            return "💥💍 Invalid \(Configuration.markerFileName): \(reason)"
         case .unexpectedProject(let expected, let found):
             return """
-                Unexpected project in \(Configuration.markerFileName).
+                💥💍 Unexpected project in \(Configuration.markerFileName).
                 Expected: \(expected), found: \(found)
                 """
         }

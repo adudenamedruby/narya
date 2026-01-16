@@ -38,9 +38,9 @@ struct Setup: ParsableCommand {
             arguments.append(location)
         }
 
-        print("Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
+        print("💍 Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
         try ShellRunner.run("git", arguments: arguments)
-        print("Cloning done.\n")
+        print("💍 Cloning done.\n")
 
         // MARK: - TEMPORARY: Create .narya.yaml marker file
         // TODO: Remove this block once .narya.yaml is added to the firefox-ios repository
@@ -48,7 +48,7 @@ struct Setup: ParsableCommand {
             .appendingPathComponent(Configuration.markerFileName)
         let markerContent = "project: firefox-ios\n"
         try markerContent.write(to: markerPath, atomically: true, encoding: .utf8)
-        print("Created \(Configuration.markerFileName) marker file (temporary).\n")
+        print("💍 Created \(Configuration.markerFileName) marker file (temporary).\n")
         // END TEMPORARY
 
         // Change into the cloned repository
@@ -57,7 +57,7 @@ struct Setup: ParsableCommand {
             throw SetupError.failedToChangeDirectory(clonePath.path)
         }
 
-        print("Running bootstrap in \(clonePath.path)...\n")
+        print("💍 Running bootstrap in \(clonePath.path)...\n")
 
         // Run bootstrap
         var bootstrap = Bootstrap()
@@ -73,7 +73,7 @@ enum SetupError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .failedToChangeDirectory(let path):
-            return "Failed to change directory to \(path)."
+            return "💥💍 Failed to change directory to \(path)."
         }
     }
 }

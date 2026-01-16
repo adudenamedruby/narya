@@ -1,4 +1,4 @@
-# 💍narya
+# 💍 narya
 
 A CLI tool for managing tasks in the [firefox-ios](https://github.com/mozilla-mobile/firefox-ios) repository.
 

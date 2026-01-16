@@ -11,9 +11,9 @@ enum ShellRunnerError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .commandFailed(let command, let exitCode):
-            return "\(command) failed with exit code \(exitCode)."
+            return "💥💍 \(command) failed with exit code \(exitCode)."
         case .executionFailed(let command, let reason):
-            return "Failed to execute \(command): \(reason)"
+            return "💥💍 Failed to execute \(command): \(reason)"
         }
     }
 }

@@ -12,7 +12,7 @@ struct Narya: ParsableCommand {
         version: Configuration.version,
         subcommands: [
             Bootstrap.self,
-            FixPackages.self,
+            Clean.self,
             Setup.self,
         ],
         defaultSubcommand: nil

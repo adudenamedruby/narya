@@ -6,8 +6,8 @@ import Foundation
 import Testing
 @testable import narya
 
-@Suite("FixPackages Tests", .serialized)
-struct FixPackagesTests {
+@Suite("Clean Tests", .serialized)
+struct CleanTests {
     let fileManager = FileManager.default
 
     func createTempDirectory() throws -> URL {
@@ -23,25 +23,22 @@ struct FixPackagesTests {
 
     @Test("Command has correct name")
     func commandHasCorrectName() {
-        #expect(FixPackages.configuration.commandName == "fix-packages")
+        #expect(Clean.configuration.commandName == "clean")
     }
 
     @Test("Command has non-empty abstract")
     func commandHasAbstract() {
-        let abstract = FixPackages.configuration.abstract
+        let abstract = Clean.configuration.abstract
         #expect(!abstract.isEmpty)
-        #expect(abstract.contains("Swift packages"))
     }
 
     @Test("Command has discussion text")
     func commandHasDiscussion() {
-        let discussion = FixPackages.configuration.discussion
+        let discussion = Clean.configuration.discussion
         #expect(!discussion.isEmpty)
-        #expect(discussion.contains("swift package reset"))
-        #expect(discussion.contains("swift package resolve"))
     }
 
-    @Test("run throws when not in firefox-ios repo")
+    @Test("run with --packages throws when not in firefox-ios repo")
     func runThrowsWhenNotInRepo() throws {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
@@ -53,7 +50,8 @@ struct FixPackagesTests {
         fileManager.changeCurrentDirectoryPath(tempDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = FixPackages()
+        var command = Clean()
+        command.packages = true
         #expect(throws: RepoDetectorError.self) {
             try command.run()
         }
