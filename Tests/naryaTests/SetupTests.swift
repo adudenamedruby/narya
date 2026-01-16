@@ -30,10 +30,10 @@ struct ToolCheckerTests {
         try ToolChecker.requireGit()
     }
 
-    @Test("requireTool throws for nonexistent tool")
-    func requireToolThrowsForNonexistent() {
+    @Test("checkTool throws for nonexistent tool")
+    func checkToolThrowsForNonexistent() {
         #expect(throws: ToolCheckerError.self) {
-            try ToolChecker.requireTool("nonexistent-tool-xyz-12345")
+            try ToolChecker.checkTool("nonexistent-tool-xyz-12345", arguments: ["--version"])
         }
     }
 }

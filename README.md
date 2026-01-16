@@ -2,31 +2,65 @@
 
 A CLI tool for managing tasks in the [firefox-ios](https://github.com/mozilla-mobile/firefox-ios) repository.
 
-Named after Narya, the Ring of Fire — one of the Three Rings of the Elves in Tolkien's legendarium.
+Named after Narya, the Ring of Fire, one of the Three Rings of Power given to the Elves.
 
 ## Requirements
 
 - macOS 13+
 - Swift 6.0+
-- git
-- Node.js and npm
+
+To test on firefox-ios, you will also need the dependencies from that repo.
 
 ## Installation
 
 narya is available through brew.
 
-Installation instructions to follow once the tap exists
+NOTE: Installation instructions to follow once the tap exists
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `narya setup` | Clone and bootstrap the firefox-ios repository |
-| `narya bootstrap` | Bootstrap the repository for Firefox or Focus development |
-| `narya clean` | Clean up cached or generated files |
-| `narya nimbus` | Manage Nimbus feature configuration files |
-| `narya telemetry` | Update telemetry configuration files |
-| `narya update version` | Update version numbers across the repository |
+| Command                | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `narya setup`          | Clone and bootstrap the firefox-ios repository            |
+| `narya bootstrap`      | Bootstrap the repository for Firefox or Focus development |
+| `narya build`          | Build Firefox, Focus, or Klar for development             |
+| `narya run`            | Build and launch in the iOS Simulator                     |
+| `narya clean`          | Clean up cached or generated files                        |
+| `narya nimbus`         | Manage Nimbus feature configuration files                 |
+| `narya telemetry`      | Update telemetry configuration files                      |
+| `narya update version` | Update version numbers across the repository              |
+
+### build
+
+Builds Firefox, Focus, or Klar for development using xcodebuild. By default, builds the product specified in `.narya.yaml` (`default_build_product`), or Firefox if not configured.
+
+The simulator is auto-detected to use the latest iOS version with a standard iPhone model (non-Pro, non-Max).
+
+```bash
+narya build                         # Build Firefox for simulator
+narya build -p focus                # Build Focus for simulator
+narya build -p klar                 # Build Klar for simulator
+narya build --for-testing           # Build for testing (generates xctestrun)
+narya build --device                # Build for connected device
+narya build --simulator "iPhone 16 Pro"  # Use specific simulator
+narya build --configuration Fennec_Testing
+narya build --clean                 # Clean before building
+narya build --skip-resolve          # Skip SPM package resolution
+narya build -q                      # Quiet mode (minimal output)
+narya build --list-simulators       # Show available simulators
+```
+
+### run
+
+Builds and launches Firefox, Focus, or Klar in the iOS Simulator. This is equivalent to running `narya build` followed by installing and launching the app.
+
+```bash
+narya run                           # Build and run Firefox
+narya run -p focus                  # Build and run Focus
+narya run --simulator "iPhone 16 Pro"
+narya run --clean                   # Clean before building
+narya run -q                        # Quiet mode
+```
 
 ### bootstrap
 
@@ -89,51 +123,56 @@ project: firefox-ios
 
 # Optional: default product for bootstrap command (firefox or focus)
 default_bootstrap: firefox
+
+# Optional: default product for build/run commands (firefox, focus, or klar)
+default_build_product: firefox
 ```
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `project` | Yes | Must be `firefox-ios` |
-| `default_bootstrap` | No | Default product for `narya bootstrap` (`firefox` or `focus`) |
+| Field                   | Required | Description                                                                       |
+| ----------------------- | -------- | --------------------------------------------------------------------------------- |
+| `project`               | Yes      | Must be `firefox-ios`                                                             |
+| `default_bootstrap`     | No       | Default product for `narya bootstrap` (`firefox` or `focus`)                      |
+| `default_build_product` | No       | Default product for `narya build` and `narya run` (`firefox`, `focus`, or `klar`) |
 
 ## Output Format
 
 All narya output is prefixed with emoji indicators:
 
-| Prefix | Meaning |
-|--------|---------|
-| 💍 | Regular status messages |
-| 💥💍 | Errors or warnings |
+| Prefix | Meaning                 |
+| ------ | ----------------------- |
+| 💍     | Regular status messages |
+| 💥💍   | Errors or warnings      |
 
 ## Architecture
 
 ```
 Sources/narya/
-├── narya.swift              # Entry point (@main)
+├── narya.swift               # Entry point (@main)
 ├── Core/
-│   ├── Configuration.swift  # App constants (name, version, etc.)
-│   ├── RepoDetector.swift   # Validates firefox-ios repository, loads .narya.yaml
-│   ├── ShellRunner.swift    # Shell command execution
-│   └── ToolChecker.swift    # Tool availability checks (git, node, npm)
+│   ├── Configuration.swift   # App constants (name, version, etc.)
+│   ├── RepoDetector.swift    # Validates firefox-ios repository, loads .narya.yaml
+│   ├── ShellRunner.swift     # Shell command execution
+│   ├── SimulatorManager.swift # iOS Simulator detection and management
+│   └── ToolChecker.swift     # Tool availability checks (git, node, npm, xcodebuild)
 └── Commands/
-    ├── Bootstrap.swift      # Bootstrap Firefox/Focus for development
-    ├── Clean.swift          # Clean build artifacts and caches
-    ├── Nimbus.swift         # Manage Nimbus feature config files
-    ├── Setup.swift          # Clone + bootstrap command
-    ├── Telemetry.swift      # Update Glean telemetry config files
-    ├── Update.swift         # Parent command for update subcommands
-    └── Version.swift        # Update version numbers
+    ├── Bootstrap.swift       # Bootstrap Firefox/Focus for development
+    ├── Build.swift           # Build Firefox/Focus/Klar with xcodebuild
+    ├── Clean.swift           # Clean build artifacts and caches
+    ├── Nimbus.swift          # Manage Nimbus feature config files
+    ├── Run.swift             # Build and launch in iOS Simulator
+    ├── Setup.swift           # Clone + bootstrap command
+    ├── Telemetry.swift       # Update Glean telemetry config files
+    ├── Update.swift          # Parent command for update subcommands
+    └── Version.swift         # Update version numbers
 ```
 
-## Development
+## Development & Contribution
 
-To work on narya:
+Contributing to `narya` is easy: please fork the repo, make your changes, and submit a PR.
+
+### Dev Notes
 
 ```bash
-# Clone this repository
-git clone https://github.com/anthropics/narya.git
-cd narya
-
 # Build
 swift build
 
@@ -141,7 +180,7 @@ swift build
 swift run narya
 ```
 
-## Testing
+### Testing Notes
 
 Tests use Swift Testing framework (`@Test`, `@Suite`, `#expect`).
 
@@ -151,8 +190,6 @@ swift test --no-parallel
 ```
 
 **Important:** Tests must be run with `--no-parallel` to avoid concurrency issues. Many tests change the current working directory, which is global process state. Running tests in parallel can cause cross-contamination between test suites.
-
-### Contributing Tests
 
 Any new feature or command must include corresponding tests. Tests should cover:
 

@@ -12,8 +12,10 @@ struct Narya: ParsableCommand {
         version: Configuration.version,
         subcommands: [
             Bootstrap.self,
+            Build.self,
             Clean.self,
             Nimbus.self,
+            Run.self,
             Setup.self,
             Telemetry.self,
             Update.self,

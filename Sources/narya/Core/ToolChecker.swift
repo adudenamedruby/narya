@@ -17,21 +17,30 @@ enum ToolCheckerError: Error, CustomStringConvertible {
 
 enum ToolChecker {
     static func requireGit() throws {
-        try requireTool("git")
+        try checkTool("git", arguments: ["--version"])
     }
 
     static func requireNode() throws {
-        try requireTool("node")
+        try checkTool("node", arguments: ["--version"])
     }
 
     static func requireNpm() throws {
-        try requireTool("npm")
+        try checkTool("npm", arguments: ["--version"])
     }
 
-    static func requireTool(_ tool: String) throws {
+    static func requireXcodebuild() throws {
+        try checkTool("xcodebuild", arguments: ["-version"])
+    }
+
+    static func requireSimctl() throws {
+        // simctl doesn't have a --version flag, so we use 'help' instead
+        try checkTool("xcrun", arguments: ["simctl", "help"])
+    }
+
+    static func checkTool(_ tool: String, arguments: [String]) throws {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = [tool, "--version"]
+        process.arguments = [tool] + arguments
         process.standardOutput = FileHandle.nullDevice
         process.standardError = FileHandle.nullDevice
 

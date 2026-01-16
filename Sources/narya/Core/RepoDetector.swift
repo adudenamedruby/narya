@@ -8,10 +8,12 @@ import Yams
 struct NaryaConfig: Codable {
     let project: String
     let defaultBootstrap: String?
+    let defaultBuildProduct: String?
 
     enum CodingKeys: String, CodingKey {
         case project
         case defaultBootstrap = "default_bootstrap"
+        case defaultBuildProduct = "default_build_product"
     }
 }
 
