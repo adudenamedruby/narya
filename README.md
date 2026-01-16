@@ -27,7 +27,10 @@ To test on firefox-ios, you will also need the dependencies from that repo.
 
 narya is available through brew.
 
-NOTE: Installation instructions to follow once the tap exists
+```bash
+brew tap adudenamedruby/tap
+brew install narya
+```
 
 ## Configuration
 
