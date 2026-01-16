@@ -17,56 +17,6 @@ narya is available through brew.
 
 Installation instructions to follow once the tap exists
 
-## Commands
-
-### `setup`
-
-Clone and bootstrap the firefox-ios repository in one step. Automatically bootstraps Firefox after cloning.
-
-```bash
-narya setup                        # Clone via HTTPS + bootstrap Firefox
-narya setup --ssh                  # Clone via SSH + bootstrap Firefox
-narya setup --location ~/code/ff   # Clone to custom location + bootstrap Firefox
-```
-
-**Options:**
-
-- `--ssh` — Use SSH URL for cloning instead of HTTPS
-- `--location <path>` — Directory path (absolute or relative) to clone into
-
-### `bootstrap`
-
-Bootstrap an existing firefox-ios repository for development. Must be run from within the repository.
-
-The `-p` flag is required to specify which product to bootstrap. Running `narya bootstrap` without `-p` will display help.
-
-```bash
-narya bootstrap                    # Show help
-narya bootstrap -p firefox         # Bootstrap Firefox
-narya bootstrap -p focus           # Bootstrap Focus
-narya bootstrap -p firefox --force # Force re-build (deletes build directory)
-```
-
-**Options:**
-
-- `-p, --product <firefox|focus>` — Product to bootstrap (required)
-- `--force` — Force re-build by deleting the build directory (Firefox only)
-
-**What bootstrap does:**
-
-For Firefox:
-
-- Removes `.venv` directories
-- Downloads and runs Nimbus FML bootstrap script
-- Installs git hooks from `.githooks/`
-- Runs `npm install` and `npm run build`
-
-For Focus:
-
-- Downloads and runs Nimbus FML bootstrap script
-- Clones shavar-prod-lists repository
-- Builds BrowserKit
-
 ## Architecture
 
 ```
