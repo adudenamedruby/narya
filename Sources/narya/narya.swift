@@ -14,6 +14,7 @@ struct Narya: ParsableCommand {
             Bootstrap.self,
             Clean.self,
             Setup.self,
+            Telemetry.self,
             Update.self,
         ],
         defaultSubcommand: nil

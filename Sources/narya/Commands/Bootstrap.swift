@@ -145,7 +145,7 @@ struct Bootstrap: ParsableCommand {
         do {
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         } catch {
-            print("💍 First swift run failed, retrying...")
+            print("💥💍 First swift run failed, retrying...")
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         }
 

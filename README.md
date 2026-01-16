@@ -32,6 +32,15 @@ Sources/narya/
     └── Bootstrap.swift      # Bootstrap command
 ```
 
+## Output Format
+
+All narya output is prefixed with emoji indicators:
+
+| Prefix | Meaning |
+|--------|---------|
+| 💍 | Regular status messages |
+| 💥💍 | Errors or warnings |
+
 ## Development
 
 To work on narya

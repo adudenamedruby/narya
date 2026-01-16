@@ -29,7 +29,7 @@ struct Version: ParsableCommand {
 
         // Can't specify both
         guard !(major && minor) else {
-            throw ValidationError("Cannot specify both --major and --minor. Choose one.")
+            throw ValidationError("💥💍 Cannot specify both --major and --minor. Choose one.")
         }
 
         // Validate we're in a firefox-ios repository and get repo root
@@ -38,7 +38,7 @@ struct Version: ParsableCommand {
         // Read current version from version.txt
         let versionFile = repo.root.appendingPathComponent("version.txt")
         guard FileManager.default.fileExists(atPath: versionFile.path) else {
-            throw ValidationError("version.txt not found at \(versionFile.path)")
+            throw ValidationError("💥💍 version.txt not found at \(versionFile.path)")
         }
 
         let versionString = try String(contentsOf: versionFile, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines)
