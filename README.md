@@ -137,12 +137,32 @@ cd narya
 # Build
 swift build
 
-# Run tests
-swift test
-
 # Run locally
 swift run narya
 ```
+
+## Testing
+
+Tests use Swift Testing framework (`@Test`, `@Suite`, `#expect`).
+
+```bash
+# Run all tests (must use --no-parallel)
+swift test --no-parallel
+```
+
+**Important:** Tests must be run with `--no-parallel` to avoid concurrency issues. Many tests change the current working directory, which is global process state. Running tests in parallel can cause cross-contamination between test suites.
+
+### Contributing Tests
+
+Any new feature or command must include corresponding tests. Tests should cover:
+
+- Command configuration (abstract, discussion text)
+- Flag/option validation
+- Expected behavior with valid inputs
+- Error handling for invalid inputs
+- Edge cases
+
+See existing test files in `Tests/naryaTests/` for examples.
 
 ## License
 

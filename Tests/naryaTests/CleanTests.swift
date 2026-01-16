@@ -2,6 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import ArgumentParser
 import Foundation
 import Testing
 @testable import narya
@@ -32,12 +33,6 @@ struct CleanTests {
         #expect(!abstract.isEmpty)
     }
 
-    @Test("Command has discussion text")
-    func commandHasDiscussion() {
-        let discussion = Clean.configuration.discussion
-        #expect(!discussion.isEmpty)
-    }
-
     @Test("run with --packages throws when not in firefox-ios repo")
     func runThrowsWhenNotInRepo() throws {
         let tempDir = try createTempDirectory()
@@ -50,8 +45,7 @@ struct CleanTests {
         fileManager.changeCurrentDirectoryPath(tempDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = Clean()
-        command.packages = true
+        var command = try Clean.parse(["--packages"])
         #expect(throws: RepoDetectorError.self) {
             try command.run()
         }

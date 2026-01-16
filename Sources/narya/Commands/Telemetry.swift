@@ -109,7 +109,7 @@ struct Telemetry: ParsableCommand {
         // Read current content and truncate after "metrics_files:"
         var content = try String(contentsOf: indexFile, encoding: .utf8)
         if let range = content.range(of: "metrics_files:") {
-            content = String(content[...range.upperBound])
+            content = String(content[..<range.upperBound])
         }
 
         // Append metric file paths

@@ -72,6 +72,35 @@ struct RepoDetectorTests {
         #expect(config.project == "firefox-ios")
     }
 
+    @Test("Loads config with default_bootstrap field")
+    func loadsConfigWithDefaultBootstrap() throws {
+        let tempDir = try createTempDirectory()
+        defer { cleanup(tempDir) }
+
+        let markerPath = tempDir.appendingPathComponent(Configuration.markerFileName)
+        let yaml = """
+            project: firefox-ios
+            default_bootstrap: focus
+            """
+        try yaml.write(to: markerPath, atomically: true, encoding: .utf8)
+
+        let config = try RepoDetector.loadConfig(from: markerPath)
+        #expect(config.project == "firefox-ios")
+        #expect(config.defaultBootstrap == "focus")
+    }
+
+    @Test("Config without default_bootstrap has nil value")
+    func configWithoutDefaultBootstrapIsNil() throws {
+        let tempDir = try createTempDirectory()
+        defer { cleanup(tempDir) }
+
+        let markerPath = tempDir.appendingPathComponent(Configuration.markerFileName)
+        try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
+
+        let config = try RepoDetector.loadConfig(from: markerPath)
+        #expect(config.defaultBootstrap == nil)
+    }
+
     @Test("Throws error for invalid YAML")
     func throwsForInvalidYaml() throws {
         let tempDir = try createTempDirectory()
