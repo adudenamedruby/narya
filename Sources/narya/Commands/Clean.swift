@@ -30,6 +30,8 @@ struct Clean: ParsableCommand {
             return
         }
 
+        Herald.reset()
+
         // Validate we're in a firefox-ios repository and get repo root
         let repo = try RepoDetector.requireValidRepo()
 
@@ -51,13 +53,13 @@ struct Clean: ParsableCommand {
         let fileManager = FileManager.default
 
         guard fileManager.fileExists(atPath: buildDir.path) else {
-            print("💍 No .build directory found, nothing to clean.")
+            Herald.declare("No .build directory found, nothing to clean.")
             return
         }
 
-        print("💍 Removing .build directory...")
+        Herald.declare("Removing .build directory...")
         try fileManager.removeItem(at: buildDir)
-        print("💍 Build directory cleaned!")
+        Herald.declare("Build directory cleaned!")
     }
 
     private func cleanDerivedData() throws {
@@ -66,22 +68,22 @@ struct Clean: ParsableCommand {
             .appendingPathComponent("Library/Developer/Xcode/DerivedData")
 
         guard fileManager.fileExists(atPath: derivedDataDir.path) else {
-            print("💍 No DerivedData directory found, nothing to clean.")
+            Herald.declare("No DerivedData directory found, nothing to clean.")
             return
         }
 
-        print("💍 Removing DerivedData directory...")
+        Herald.declare("Removing DerivedData directory...")
         try fileManager.removeItem(at: derivedDataDir)
-        print("💍 DerivedData cleaned!")
+        Herald.declare("DerivedData cleaned!")
     }
 
     private func cleanPackages(repoRoot: URL) throws {
-        print("💍 Resetting Swift packages...")
+        Herald.declare("Resetting Swift packages...")
         try ShellRunner.run("swift", arguments: ["package", "reset"], workingDirectory: repoRoot)
 
-        print("💍 Resolving Swift packages...")
+        Herald.declare("Resolving Swift packages...")
         try ShellRunner.run("swift", arguments: ["package", "resolve"], workingDirectory: repoRoot)
 
-        print("💍 Swift packages cleaned!")
+        Herald.declare("Swift packages cleaned!")
     }
 }

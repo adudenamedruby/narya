@@ -40,6 +40,8 @@ struct Bootstrap: ParsableCommand {
     var force = false
 
     mutating func run() throws {
+        Herald.reset()
+
         // Validate we're in a firefox-ios repository and get repo root
         let repo = try RepoDetector.requireValidRepo()
 
@@ -70,7 +72,7 @@ struct Bootstrap: ParsableCommand {
     }
 
     private func bootstrapFirefox(repoRoot: URL) throws {
-        print("💍 Running Firefox bootstrap...")
+        Herald.declare("Running Firefox bootstrap...")
 
         let fileManager = FileManager.default
 
@@ -78,17 +80,17 @@ struct Bootstrap: ParsableCommand {
         if force {
             let buildDir = repoRoot.appendingPathComponent("build")
             if fileManager.fileExists(atPath: buildDir.path) {
-                print("💍 Removing build directory...")
+                Herald.declare("Removing build directory...")
                 try fileManager.removeItem(at: buildDir)
             }
         }
 
         // Delete all .venv folders
-        print("💍 Cleaning up virtual environments...")
+        Herald.declare("Cleaning up virtual environments...")
         try deleteVenvFolders(in: repoRoot)
 
         // Download and run nimbus-fml bootstrap script
-        print("💍 Setting up Nimbus FML...")
+        Herald.declare("Setting up Nimbus FML...")
         let nimbusFmlFile = "./firefox-ios/nimbus.fml.yaml"
         try runNimbusBootstrap(
             nimbusFmlFile: nimbusFmlFile,
@@ -97,27 +99,27 @@ struct Bootstrap: ParsableCommand {
         )
 
         // Copy git hooks
-        print("💍 Installing git hooks...")
+        Herald.declare("Installing git hooks...")
         try installGitHooks(repoRoot: repoRoot)
 
         // Run npm install and build
-        print("💍 Installing Node.js dependencies...")
+        Herald.declare("Installing Node.js dependencies...")
         try ShellRunner.run("npm", arguments: ["install"], workingDirectory: repoRoot)
 
-        print("💍 Building user scripts...")
+        Herald.declare("Building user scripts...")
         try ShellRunner.run("npm", arguments: ["run", "build"], workingDirectory: repoRoot)
 
-        print("💍 Firefox bootstrap complete!")
+        Herald.declare("Firefox bootstrap complete!")
     }
 
     private func bootstrapFocus(repoRoot: URL) throws {
-        print("💍 Running Focus bootstrap...")
+        Herald.declare("Running Focus bootstrap...")
 
         let fileManager = FileManager.default
         let focusDir = repoRoot.appendingPathComponent("focus-ios")
 
         // Download and run nimbus-fml bootstrap script
-        print("💍 Setting up Nimbus FML...")
+        Herald.declare("Setting up Nimbus FML...")
         let nimbusFmlFile = "./nimbus.fml.yaml"
         try runNimbusBootstrap(
             nimbusFmlFile: nimbusFmlFile,
@@ -125,7 +127,7 @@ struct Bootstrap: ParsableCommand {
         )
 
         // Clone shavar-prod-lists
-        print("💍 Setting up shavar-prod-lists...")
+        Herald.declare("Setting up shavar-prod-lists...")
         let shavarCommitHash = "91cf7dd142fc69aabe334a1a6e0091a1db228203"
         let shavarDir = repoRoot.appendingPathComponent("shavar-prod-lists")
 
@@ -144,7 +146,7 @@ struct Bootstrap: ParsableCommand {
         ])
 
         // Run swift in BrowserKit
-        print("💍 Building BrowserKit...")
+        Herald.declare("Building BrowserKit...")
         let browserKitDir = repoRoot.appendingPathComponent("BrowserKit")
 
         // MARK: - Swift retry logic
@@ -154,11 +156,11 @@ struct Bootstrap: ParsableCommand {
         do {
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         } catch {
-            print("💥💍 First swift run failed, retrying...")
+            Herald.warn("First swift run failed, retrying...")
             try ShellRunner.run("swift", arguments: ["run"], workingDirectory: browserKitDir)
         }
 
-        print("💍 Focus bootstrap complete!")
+        Herald.declare("Focus bootstrap complete!")
     }
 
     private func deleteVenvFolders(in directory: URL) throws {
@@ -224,7 +226,7 @@ struct Bootstrap: ParsableCommand {
         let gitHooksDest = repoRoot.appendingPathComponent(".git/hooks")
 
         guard fileManager.fileExists(atPath: gitHooksSource.path) else {
-            print("💍 No .githooks directory found, skipping hook installation.")
+            Herald.declare("No .githooks directory found, skipping hook installation.")
             return
         }
 

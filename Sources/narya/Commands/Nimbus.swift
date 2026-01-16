@@ -36,21 +36,23 @@ struct Nimbus: ParsableCommand {
             return
         }
 
+        Herald.reset()
+
         let repo = try RepoDetector.requireValidRepo()
 
         if let featureName = add {
             try runAdd(featureName: featureName, repoRoot: repo.root)
         } else if refresh {
-            try runUpdate(repoRoot: repo.root)
+            try runRefresh(repoRoot: repo.root)
         }
     }
 
-    // MARK: - Update Command
+    // MARK: - Refresh Command
 
-    private func runUpdate(repoRoot: URL) throws {
-        print("💍 Updating nimbus.fml.yaml include block...")
+    private func runRefresh(repoRoot: URL) throws {
+        Herald.declare("Updating nimbus.fml.yaml include block...")
         try updateNimbusFml(repoRoot: repoRoot)
-        print("💍 Successfully updated nimbus.fml.yaml")
+        Herald.declare("Successfully updated nimbus.fml.yaml")
     }
 
     // MARK: - Add Command
@@ -64,15 +66,15 @@ struct Nimbus: ParsableCommand {
             .appendingPathComponent(fileName)
 
         // Create the feature file
-        print("💍 Creating feature file for \(standardizedName)...")
+        Herald.declare("Creating feature file for \(standardizedName)...")
         try writeFeatureTemplate(to: newFilePath, featureName: standardizedName)
-        print("💍 Successfully added file: \(Self.nimbusFeaturesPath)/\(fileName)")
+        Herald.declare("Successfully added file: \(Self.nimbusFeaturesPath)/\(fileName)")
 
         // Update the FML include block
         try updateNimbusFml(repoRoot: repoRoot)
-        print("💍 Successfully updated nimbus.fml.yaml")
+        Herald.declare("Successfully updated nimbus.fml.yaml")
 
-        print("💍 Please remember to add this feature to the feature flag spreadsheet.")
+        Herald.declare("Please remember to add this feature to the feature flag spreadsheet.")
     }
 
     // MARK: - FML Operations

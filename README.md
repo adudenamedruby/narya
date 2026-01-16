@@ -19,17 +19,17 @@ NOTE: Installation instructions to follow once the tap exists
 
 ## Commands
 
-| Command                | Description                                               |
-| ---------------------- | --------------------------------------------------------- |
-| `narya setup`          | Clone and bootstrap the firefox-ios repository            |
-| `narya bootstrap`      | Bootstrap the repository for Firefox or Focus development |
-| `narya build`          | Build Firefox, Focus, or Klar for development             |
-| `narya run`            | Build and launch in the iOS Simulator                     |
-| `narya test`           | Run tests for Firefox, Focus, or Klar                     |
-| `narya clean`          | Clean up cached or generated files                        |
-| `narya nimbus`         | Manage Nimbus feature configuration files                 |
-| `narya telemetry`      | Update telemetry configuration files                      |
-| `narya version`        | Display or update version numbers across the repository   |
+| Command           | Description                                               |
+| ----------------- | --------------------------------------------------------- |
+| `narya setup`     | Clone and bootstrap the firefox-ios repository            |
+| `narya bootstrap` | Bootstrap the repository for Firefox or Focus development |
+| `narya build`     | Build Firefox, Focus, or Klar for development             |
+| `narya run`       | Build and launch in the iOS Simulator                     |
+| `narya test`      | Run tests for Firefox, Focus, or Klar                     |
+| `narya clean`     | Clean up cached or generated files                        |
+| `narya nimbus`    | Manage Nimbus feature configuration files                 |
+| `narya telemetry` | Update telemetry configuration files                      |
+| `narya version`   | Display or update version numbers across the repository   |
 
 ### build
 
@@ -70,6 +70,7 @@ narya run --expose                  # Print commands without running
 Runs tests for Firefox, Focus, or Klar using xcodebuild. By default, runs unit tests for the product specified in `.narya.yaml` (`default_build_product`), or Firefox if not configured.
 
 Test plans available:
+
 - `unit` - Unit tests (default)
 - `smoke` - Smoke/UI tests
 - `accessibility` - Accessibility tests (Firefox only)
@@ -165,12 +166,13 @@ default_build_product: firefox
 
 ## Output Format
 
-All narya output is prefixed with emoji indicators:
+All narya output is handled by the `Herald`. The maintain clarity between `narya`'s output and the output of tools/commands it wraps, we have a standard way of presenting output. The beginning of every action block from `narya` is preceeded by a 💍 and intedent afterwards. To maintain this format, always `reset()` the `Herald` before beginning a new action.
 
-| Prefix | Meaning                 |
-| ------ | ----------------------- |
-| 💍     | Regular status messages |
-| 💥💍   | Errors or warnings      |
+| Function  | Meaning                           |
+| --------- | --------------------------------- |
+| reset()   | Begin a new block to output.      |
+| declare() | Used to output a regular block    |
+| warn()    | Used to output errors or warnings |
 
 ## Architecture
 
@@ -179,6 +181,7 @@ Sources/narya/
 ├── narya.swift               # Entry point (@main)
 ├── Core/
 │   ├── Configuration.swift   # App constants (name, version, etc.)
+│   ├── Herald.swift          # Formatted output handling (💍/▌ prefixes)
 │   ├── RepoDetector.swift    # Validates firefox-ios repository, loads .narya.yaml
 │   ├── ShellRunner.swift     # Shell command execution
 │   ├── SimulatorManager.swift # iOS Simulator detection and management

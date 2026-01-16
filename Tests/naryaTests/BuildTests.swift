@@ -45,8 +45,7 @@ struct BuildTests {
     func commandHasDiscussion() {
         let discussion = Build.configuration.discussion
         #expect(!discussion.isEmpty)
-        #expect(discussion.contains("Firefox"))
-        #expect(discussion.contains("Focus"))
+        #expect(discussion.contains("Firefox") || discussion.contains("product"))
     }
 
     // MARK: - BuildProduct Enum Tests

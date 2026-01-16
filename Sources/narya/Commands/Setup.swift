@@ -17,6 +17,8 @@ struct Setup: ParsableCommand {
     var location: String?
 
     mutating func run() throws {
+        Herald.reset()
+
         try ToolChecker.requireGit()
         try ToolChecker.requireNode()
         try ToolChecker.requireNpm()
@@ -38,16 +40,16 @@ struct Setup: ParsableCommand {
             arguments.append(location)
         }
 
-        print("💍 Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
+        Herald.declare("Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
         try ShellRunner.run("git", arguments: arguments)
-        print("💍 Cloning done.\n")
+        Herald.declare("Cloning done.")
 
         // TODO: Remove this block once .narya.yaml is added to the firefox-ios repository
         let markerPath = URL(fileURLWithPath: cloneDir)
             .appendingPathComponent(Configuration.markerFileName)
         let markerContent = "project: firefox-ios\n"
         try markerContent.write(to: markerPath, atomically: true, encoding: .utf8)
-        print("💍 Created \(Configuration.markerFileName) marker file (temporary).\n")
+        Herald.declare("Created \(Configuration.markerFileName) marker file (temporary).")
         // END TEMPORARY
 
         // Change into the cloned repository
@@ -56,7 +58,7 @@ struct Setup: ParsableCommand {
             throw SetupError.failedToChangeDirectory(clonePath.path)
         }
 
-        print("💍 Running bootstrap in \(clonePath.path)...\n")
+        Herald.declare("Running bootstrap in \(clonePath.path)...")
 
         // Run bootstrap
         var bootstrap = Bootstrap()

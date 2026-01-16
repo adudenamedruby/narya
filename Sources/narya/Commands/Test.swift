@@ -185,6 +185,8 @@ struct Test: ParsableCommand {
     // MARK: - Run
 
     mutating func run() throws {
+        Herald.reset()
+
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
 
@@ -221,7 +223,7 @@ struct Test: ParsableCommand {
 
         // Print test info
         if !quiet {
-            print("💍 Test Configuration:")
+            Herald.declare(" Test Configuration:")
             print("   Product: \(testProduct.scheme)")
             print("   Test Plan: \(plan.displayName)")
             print("   Simulator: \(simulatorSelection.simulator.name) (iOS \(simulatorSelection.runtime.version))")
@@ -248,7 +250,7 @@ struct Test: ParsableCommand {
             repoRoot: repo.root
         )
 
-        print("💍 Tests passed!")
+        Herald.declare(" Tests passed!")
     }
 
     // MARK: - Private Methods
@@ -280,7 +282,7 @@ struct Test: ParsableCommand {
         simulator: SimulatorSelection
     ) throws {
         if !quiet {
-            print("💍 Building \(product.scheme) for testing...")
+            Herald.declare(" Building \(product.scheme) for testing...")
         }
 
         var args = [
@@ -321,7 +323,7 @@ struct Test: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Build for testing succeeded!")
+            Herald.declare(" Build for testing succeeded!")
             print("")
         }
     }
@@ -333,7 +335,7 @@ struct Test: ParsableCommand {
         repoRoot: URL
     ) throws {
         if !quiet {
-            print("💍 Running \(plan.displayName) for \(product.scheme)...")
+            Herald.declare(" Running \(plan.displayName) for \(product.scheme)...")
         }
 
         var args = [

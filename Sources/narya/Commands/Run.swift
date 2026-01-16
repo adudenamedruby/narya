@@ -77,6 +77,8 @@ struct Run: ParsableCommand {
     // MARK: - Run
 
     mutating func run() throws {
+        Herald.reset()
+
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
 
@@ -108,7 +110,7 @@ struct Run: ParsableCommand {
 
         // Print run info
         if !quiet {
-            print("💍 Run Configuration:")
+            Herald.declare(" Run Configuration:")
             print("   Product: \(buildProduct.scheme)")
             print("   Simulator: \(simulatorSelection.simulator.name) (iOS \(simulatorSelection.runtime.version))")
             print("")
@@ -134,7 +136,7 @@ struct Run: ParsableCommand {
 
         // Boot simulator if needed
         if !quiet {
-            print("💍 Booting simulator...")
+            Herald.declare(" Booting simulator...")
         }
         try SimulatorManager.bootSimulator(udid: simulatorSelection.simulator.udid)
 
@@ -146,20 +148,20 @@ struct Run: ParsableCommand {
 
         // Install the app
         if !quiet {
-            print("💍 Installing \(buildProduct.scheme)...")
+            Herald.declare(" Installing \(buildProduct.scheme)...")
         }
         try SimulatorManager.installApp(path: appPath, simulatorUdid: simulatorSelection.simulator.udid)
 
         // Launch the app
         if !quiet {
-            print("💍 Launching \(buildProduct.scheme)...")
+            Herald.declare(" Launching \(buildProduct.scheme)...")
         }
         try SimulatorManager.launchApp(
             bundleId: buildProduct.bundleIdentifier,
             simulatorUdid: simulatorSelection.simulator.udid
         )
 
-        print("💍 \(buildProduct.scheme) is running in \(simulatorSelection.simulator.name)!")
+        Herald.declare(" \(buildProduct.scheme) is running in \(simulatorSelection.simulator.name)!")
     }
 
     // MARK: - Private Methods
@@ -190,7 +192,7 @@ struct Run: ParsableCommand {
 
     private func performClean() throws {
         if !quiet {
-            print("💍 Cleaning build folder...")
+            Herald.declare(" Cleaning build folder...")
         }
 
         // Clean derived data if a custom path was specified
@@ -202,13 +204,13 @@ struct Run: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Clean complete.")
+            Herald.declare(" Clean complete.")
         }
     }
 
     private func resolvePackages(projectPath: URL) throws {
         if !quiet {
-            print("💍 Resolving Swift Package dependencies...")
+            Herald.declare(" Resolving Swift Package dependencies...")
         }
 
         let args = [
@@ -224,7 +226,7 @@ struct Run: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Package resolution complete.")
+            Herald.declare(" Package resolution complete.")
             print("")
         }
     }
@@ -236,7 +238,7 @@ struct Run: ParsableCommand {
         repoRoot: URL
     ) throws {
         if !quiet {
-            print("💍 Building \(product.scheme)...")
+            Herald.declare(" Building \(product.scheme)...")
         }
 
         var args = buildXcodebuildArgs(
@@ -269,7 +271,7 @@ struct Run: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Build succeeded!")
+            Herald.declare(" Build succeeded!")
             print("")
         }
     }

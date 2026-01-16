@@ -80,19 +80,12 @@ struct Build: ParsableCommand {
 
             The simulator is auto-detected to use the latest iOS version with \
             a standard iPhone model (non-Pro, non-Max).
-
-            Examples:
-              narya build                    Build Firefox for simulator
-              narya build -p focus           Build Focus for simulator
-              narya build --for-testing      Build Firefox for testing
-              narya build --device           Build Firefox for device
-              narya build --list-simulators  Show available simulators
             """
     )
 
     // MARK: - Product Selection
 
-    @Option(name: [.short, .long], help: "Product to build: firefox, focus, or klar.")
+    @Option(name: [.short, .long], help: "Product to build <firefox|focus|klar>")
     var product: BuildProduct?
 
     // MARK: - Build Type
@@ -102,10 +95,10 @@ struct Build: ParsableCommand {
 
     // MARK: - Destination
 
-    @Flag(name: .long, help: "Build for a connected device instead of simulator.")
+    @Flag(name: [.short, .long], help: "Build for a connected device instead of simulator.")
     var device = false
 
-    @Option(name: .long, help: "Simulator name (default: auto-detect latest).")
+    @Option(name: [.short, .long], help: "Simulator name (default: auto-detect latest).")
     var simulator: String?
 
     @Option(name: .long, help: "iOS version for simulator (default: latest).")
@@ -143,12 +136,15 @@ struct Build: ParsableCommand {
     mutating func run() throws {
         // Handle --list-simulators separately (doesn't need repo validation)
         if listSimulators {
+            Herald.reset()
             try printSimulatorList()
             return
         }
 
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
+
+        Herald.reset()
 
         // Check for required tools
         try ToolChecker.requireXcodebuild()
@@ -199,7 +195,7 @@ struct Build: ParsableCommand {
             simulator: simulatorSelection
         )
 
-        print("💍 Build succeeded!")
+        Herald.declare("Build succeeded!")
     }
 
     // MARK: - Private Methods
@@ -231,29 +227,29 @@ struct Build: ParsableCommand {
     private func printBuildInfo(product: BuildProduct, simulator: SimulatorSelection?, repoRoot: URL) {
         if quiet { return }
 
-        print("💍 Build Configuration:")
-        print("   Product: \(product.scheme)")
-        print("   Project: \(product.projectPath)")
+        Herald.declare("Build Configuration:")
+        Herald.declare("  Product: \(product.scheme)")
+        Herald.declare("  Project: \(product.projectPath)")
 
         let config = configuration ?? (forTesting ? product.testingConfiguration : product.defaultConfiguration)
-        print("   Configuration: \(config)")
+        Herald.declare("  Configuration: \(config)")
 
         if let sim = simulator {
-            print("   Simulator: \(sim.simulator.name) (iOS \(sim.runtime.version))")
+            Herald.declare("  Simulator: \(sim.simulator.name) (iOS \(sim.runtime.version))")
         } else if device {
-            print("   Destination: Connected device")
+            Herald.declare("  Destination: Connected device")
         }
 
         if forTesting {
-            print("   Build Type: build-for-testing")
+            Herald.declare("  Build Type: build-for-testing")
         }
 
-        print("")
+        Herald.declare("")
     }
 
     private func performClean(repoRoot: URL) throws {
         if !quiet {
-            print("💍 Cleaning build folder...")
+            Herald.declare("Cleaning build folder...")
         }
 
         // Clean derived data if a custom path was specified
@@ -265,13 +261,13 @@ struct Build: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Clean complete.")
+            Herald.declare("Clean complete.")
         }
     }
 
     private func resolvePackages(projectPath: URL) throws {
         if !quiet {
-            print("💍 Resolving Swift Package dependencies...")
+            Herald.declare("Resolving Swift Package dependencies...")
         }
 
         let args = [
@@ -287,8 +283,8 @@ struct Build: ParsableCommand {
         }
 
         if !quiet {
-            print("💍 Package resolution complete.")
-            print("")
+            Herald.declare("Package resolution complete.")
+            Herald.declare("")
         }
     }
 
@@ -298,7 +294,7 @@ struct Build: ParsableCommand {
         simulator: SimulatorSelection?
     ) throws {
         if !quiet {
-            print("💍 Building \(product.scheme)...")
+            Herald.declare("Building \(product.scheme)...")
         }
 
         var args = buildXcodebuildArgs(
@@ -385,29 +381,29 @@ struct Build: ParsableCommand {
         let simulatorsByRuntime = try SimulatorManager.listSimulators()
 
         guard !simulatorsByRuntime.isEmpty else {
-            print("💍 No iOS simulators found. Please install simulators via Xcode.")
+            Herald.declare("No iOS simulators found. Please install simulators via Xcode.")
             return
         }
 
-        print("💍 Available iOS Simulators:")
-        print("")
+        Herald.declare("Available iOS Simulators:")
+        Herald.declare("")
 
         for (runtime, devices) in simulatorsByRuntime {
-            print("\(runtime.name):")
+            Herald.declare("\(runtime.name):")
 
             for device in devices {
                 let bootedIndicator = device.isBooted ? " (Booted)" : ""
                 let udidShort = String(device.udid.prefix(8)) + "..."
-                print("  \(device.name)\(bootedIndicator)".padding(toLength: 35, withPad: " ", startingAt: 0) + udidShort)
+                Herald.declare("  \(device.name)\(bootedIndicator)".padding(toLength: 35, withPad: " ", startingAt: 0) + udidShort)
             }
 
-            print("")
+            Herald.declare("")
         }
 
         // Show default
         do {
             let defaultSim = try SimulatorManager.findDefaultSimulator()
-            print("💍 Default: \(defaultSim.simulator.name) (iOS \(defaultSim.runtime.version))")
+            Herald.declare("Default: \(defaultSim.simulator.name) (iOS \(defaultSim.runtime.version))")
         } catch {
             // Ignore errors finding default
         }

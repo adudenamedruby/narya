@@ -24,7 +24,7 @@ struct Narya: ParsableCommand {
         defaultSubcommand: nil
     )
 
-    @Flag(name: .long, help: "Show version and tool information.")
+    @Flag(name: .long, help: "Show tool information.")
     var about = false
 
     mutating func run() throws {

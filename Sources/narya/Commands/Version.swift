@@ -8,13 +8,7 @@ import Foundation
 struct Version: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Display or update the version number in the firefox-ios repository.",
-        discussion: """
-            Without options, displays the current version from version.txt and git SHA.
-
-            Use --bump to increment major (X.Y -> (X+1).0) or minor (X.Y -> X.(Y+1)) version.
-            Use --set to explicitly set the version.
-            Use --verify to check version consistency across all config files.
-            """
+        discussion: ""
     )
 
     // MARK: - Options
@@ -24,7 +18,7 @@ struct Version: ParsableCommand {
         case minor
     }
 
-    @Option(name: .long, help: "Bump version: 'major' (X.Y -> (X+1).0) or 'minor' (X.Y -> X.(Y+1)).")
+    @Option(name: [.short, .long], help: "Bump version: 'major' (X.Y -> (X+1).0) or 'minor' (X.Y -> X.(Y+1)).")
     var bump: BumpType?
 
     @Option(name: .long, help: "Set version explicitly (e.g., '123.4').")
@@ -47,6 +41,8 @@ struct Version: ParsableCommand {
     private static let extensionsDir = "firefox-ios/Extensions"
 
     mutating func run() throws {
+        Herald.reset()
+
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
 
@@ -74,9 +70,9 @@ struct Version: ParsableCommand {
         let gitSha = getGitSha(repoRoot: repoRoot)
 
         if let sha = gitSha {
-            print("💍 \(version) (\(sha))")
+            Herald.declare("\(version) (\(sha))")
         } else {
-            print("💍 \(version)")
+            Herald.declare(version)
         }
     }
 
@@ -114,9 +110,9 @@ struct Version: ParsableCommand {
 
         let newVersion = "\(newMajor).\(newMinor)"
 
-        print("💍 Bumping version: \(currentVersion) -> \(newVersion)")
+        Herald.declare("Bumping version: \(currentVersion) -> \(newVersion)")
         try updateVersionInFiles(from: currentVersion, to: newVersion, repoRoot: repoRoot)
-        print("💍 Version updated to \(newVersion)")
+        Herald.declare("Version updated to \(newVersion)")
     }
 
     // MARK: - Set Version
@@ -128,20 +124,20 @@ struct Version: ParsableCommand {
         let currentVersion = try readVersion(repoRoot: repoRoot)
 
         if currentVersion == newVersion {
-            print("💍 Version is already \(newVersion)")
+            Herald.declare("Version is already \(newVersion)")
             return
         }
 
-        print("💍 Setting version: \(currentVersion) -> \(newVersion)")
+        Herald.declare("Setting version: \(currentVersion) -> \(newVersion)")
         try updateVersionInFiles(from: currentVersion, to: newVersion, repoRoot: repoRoot)
-        print("💍 Version updated to \(newVersion)")
+        Herald.declare("Version updated to \(newVersion)")
     }
 
     // MARK: - Verify Version
 
     private func runVerify(repoRoot: URL) throws {
         let expectedVersion = try readVersion(repoRoot: repoRoot)
-        print("💍 Verifying version consistency (expected: \(expectedVersion))...")
+        Herald.declare("Verifying version consistency (expected: \(expectedVersion))...")
 
         var mismatches: [(file: String, found: String?)] = []
 
@@ -165,9 +161,9 @@ struct Version: ParsableCommand {
         }
 
         if mismatches.isEmpty {
-            print("💍 All files have consistent version \(expectedVersion)")
+            Herald.declare("All files have consistent version \(expectedVersion)")
         } else {
-            print("💥💍 Version mismatches found:")
+            Herald.warn("Version mismatches found:")
             for mismatch in mismatches {
                 if let found = mismatch.found {
                     print("  - \(mismatch.file): found '\(found)'")
@@ -285,7 +281,7 @@ struct Version: ParsableCommand {
 
     private func updateVersionInFile(at url: URL, from currentVersion: String, to newVersion: String) throws {
         guard FileManager.default.fileExists(atPath: url.path) else {
-            print("💥💍 Warning: File not found, skipping: \(url.path)")
+            Herald.warn("Warning: File not found, skipping: \(url.path)")
             return
         }
 

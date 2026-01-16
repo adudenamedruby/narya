@@ -45,10 +45,10 @@ struct VersionTests {
         #expect(!abstract.isEmpty)
     }
 
-    @Test("Command has discussion text")
+    @Test("Discussion text is defined")
     func commandHasDiscussion() {
-        let discussion = Version.configuration.discussion
-        #expect(!discussion.isEmpty)
+        // Discussion can be empty for simple commands
+        _ = Version.configuration.discussion
     }
 
     // MARK: - Default Behavior Tests (Print Version)

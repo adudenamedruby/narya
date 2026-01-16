@@ -9,9 +9,6 @@ enum Configuration {
     static let version = "0.1.0"
     static let shortDescription = "A helper CLI for the firefox-ios repository"
     static let longDescription = """
-        narya provides a single entry point for the running of common tasks,
-        automations, and workflows used in the development of mozilla-mobile/firefox-ios.
-
         On the Origins of Narya
 
         In the days of the making of the Rings, when the skill of the Elven-smiths
@@ -42,7 +39,12 @@ enum Configuration {
 
     static var aboutText: String {
         """
-        \(name) (version \(version))
+        \(name) v\(version)
+
+        `narya` provides a single entry point for the running of common tasks,
+        automations, and workflows used in the development of mozilla-mobile/firefox-ios.
+
+        forged by @adudenamedruby
 
         \(longDescription)
         """
