@@ -23,9 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Swift 6.2.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.2.0"
+
+      - name: Verify Swift
+        run: swift --version
+
       - name: Build (release)
         run: |
-          swift --version
           swift build -c release --arch ${{ matrix.arch }}
 
       - name: Package
@@ -33,16 +40,12 @@ jobs:
           BIN_NAME="narya"
           OUT_DIR="dist"
           mkdir -p "$OUT_DIR"
-
-          # SwiftPM output path (most common)
           cp ".build/release/$BIN_NAME" "$OUT_DIR/$BIN_NAME"
-
           chmod +x "$OUT_DIR/$BIN_NAME"
 
           VERSION="${GITHUB_REF_NAME}" # e.g. v0.1.0
           TARBALL="narya-${VERSION}-macos-${{ matrix.arch }}.tar.gz"
           tar -C "$OUT_DIR" -czf "$TARBALL" "$BIN_NAME"
-
           shasum -a 256 "$TARBALL" | tee "${TARBALL}.sha256"
 
       - name: Upload assets to GitHub Release
