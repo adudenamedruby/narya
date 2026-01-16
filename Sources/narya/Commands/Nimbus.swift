@@ -11,7 +11,7 @@ struct Nimbus: ParsableCommand {
         discussion: """
             Updates the nimbus.fml.yaml include block with feature files from nimbus-features/.
 
-            Use --update to refresh the include block with current feature files.
+            Use --refresh to refresh the include block with current feature files.
             Use --add to create a new feature YAML file.
             """
     )
@@ -23,15 +23,15 @@ struct Nimbus: ParsableCommand {
 
     // MARK: - Options
 
-    @Flag(name: .long, help: "Update the include block in nimbus.fml.yaml with current feature files.")
-    var update = false
+    @Flag(name: .long, help: "Refresh the include block in nimbus.fml.yaml with current feature files.")
+    var refresh = false
 
     @Option(name: .long, help: "Create a new feature YAML file (provide camelCase name).")
     var add: String?
 
     mutating func run() throws {
         // If neither flag is specified, show help
-        guard update || add != nil else {
+        guard refresh || add != nil else {
             print(Nimbus.helpMessage())
             return
         }
@@ -40,7 +40,7 @@ struct Nimbus: ParsableCommand {
 
         if let featureName = add {
             try runAdd(featureName: featureName, repoRoot: repo.root)
-        } else if update {
+        } else if refresh {
             try runUpdate(repoRoot: repo.root)
         }
     }

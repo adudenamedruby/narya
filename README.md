@@ -116,7 +116,7 @@ narya clean --all           # Clean everything
 Manages Nimbus feature configuration files. Updates the `include` block in `nimbus.fml.yaml` with feature files from the `nimbus-features/` directory.
 
 ```bash
-narya nimbus --update              # Refresh nimbus.fml.yaml include block
+narya nimbus --refresh             # Refresh nimbus.fml.yaml include block
 narya nimbus --add newFeature      # Add new feature YAML (appends "Feature" if needed)
 ```
 
@@ -125,7 +125,7 @@ narya nimbus --add newFeature      # Add new feature YAML (appends "Feature" if 
 Updates Glean telemetry configuration files.
 
 ```bash
-narya telemetry --update                      # Refresh index files
+narya telemetry --refresh                     # Refresh index files
 narya telemetry --add newFeature              # Add new metrics YAML
 narya telemetry --add newFeature --description "Description"
 ```

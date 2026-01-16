@@ -101,7 +101,7 @@ struct TelemetryTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Telemetry.parse(["--update", "--add", "someFeature"])
+        var command = try Telemetry.parse(["--refresh", "--add", "someFeature"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -157,7 +157,7 @@ struct TelemetryTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Telemetry.parse(["--update"])
+        var command = try Telemetry.parse(["--refresh"])
         try command.run()
 
         // Verify the index was updated

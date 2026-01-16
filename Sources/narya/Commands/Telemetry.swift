@@ -23,8 +23,8 @@ struct Telemetry: ParsableCommand {
 
     // MARK: - Options
 
-    @Flag(name: .long, help: "Update glean_index.yaml and gleanProbes.xcfilelist with current metric files.")
-    var update = false
+    @Flag(name: .long, help: "Refresh glean_index.yaml and gleanProbes.xcfilelist with current metric files.")
+    var refresh = false
 
     @Option(name: .long, help: "Create a new metrics YAML for a feature (provide camelCase name).")
     var add: String?
@@ -34,19 +34,19 @@ struct Telemetry: ParsableCommand {
 
     mutating func run() throws {
         // If neither flag is specified, show help
-        guard update || add != nil else {
+        guard refresh || add != nil else {
             print(Telemetry.helpMessage())
             return
         }
 
         // Can't specify both
-        guard !(update && add != nil) else {
-            throw ValidationError("💥💍 Cannot specify both --update and --add. Choose one.")
+        guard !(refresh && add != nil) else {
+            throw ValidationError("💥💍 Cannot specify both --refresh and --add. Choose one.")
         }
 
         let repo = try RepoDetector.requireValidRepo()
 
-        if update {
+        if refresh {
             try runUpdate(repoRoot: repo.root)
         } else if let featureName = add {
             try runAdd(featureName: featureName, description: description, repoRoot: repo.root)

@@ -84,7 +84,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(tempDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--update"])
+        var command = try Nimbus.parse(["--refresh"])
 
         #expect(throws: RepoDetectorError.self) {
             try command.run()
@@ -108,7 +108,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--update"])
+        var command = try Nimbus.parse(["--refresh"])
         try command.run()
 
         // Verify the FML was updated
@@ -133,7 +133,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--update"])
+        var command = try Nimbus.parse(["--refresh"])
         try command.run()
 
         let fmlFile = repoDir.appendingPathComponent("firefox-ios/nimbus.fml.yaml")
@@ -281,7 +281,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--update"])
+        var command = try Nimbus.parse(["--refresh"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
