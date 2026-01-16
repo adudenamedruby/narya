@@ -6,7 +6,7 @@ import Foundation
 
 enum Configuration {
     static let name = "narya"
-    static let version = "0.3.0"
+    static let version = "0.3.1"
     static let shortDescription = "A helper CLI for the firefox-ios repository"
     static let longDescription = """
         On the Origins of Narya
