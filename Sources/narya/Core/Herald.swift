@@ -5,14 +5,14 @@
 import Foundation
 
 /// Handles formatted output for narya commands.
-/// The first line of output uses 💍, subsequent lines use ▌
+/// The first line of output uses 💍, subsequent lines use ▒
 enum Herald {
     // This is a CLI tool that runs single-threaded, so mutable global state is safe
     nonisolated(unsafe) private static var isFirstLine = true
 
     /// Declares a message with the appropriate prefix (💍 for first line, ▌ for subsequent)
     static func declare(_ message: String) {
-        let prefix = isFirstLine ? "💍" : "▌"
+        let prefix = isFirstLine ? "💍" : "▒"
         isFirstLine = false
         Swift.print("\(prefix) \(message)")
     }
