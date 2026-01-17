@@ -48,17 +48,22 @@ struct Narya: ParsableCommand {
     static func main() {
         do {
             var command = try parseAsRoot()
-            try command.run()
-        } catch let error as CleanExit {
-            // Clean exits (help, version, etc.)
-            Self.exit(withError: error)
-        } catch let error as ValidationError {
-            // ArgumentParser validation errors - let it handle formatting
-            Self.exit(withError: error)
+            do {
+                try command.run()
+            } catch {
+                // Check if this is an ArgumentParser internal error (help, version, etc.)
+                let errorDescription = String(describing: error)
+                if errorDescription.contains("ArgumentParser") || error is CleanExit {
+                    Self.exit(withError: error)
+                }
+
+                // Runtime errors go through Herald
+                Herald.warn(String(describing: error))
+                Self.exit(withError: ExitCode.failure)
+            }
         } catch {
-            // Report other errors through Herald
-            Herald.warn(String(describing: error))
-            Self.exit(withError: ExitCode.failure)
+            // Parsing errors go to ArgumentParser
+            Self.exit(withError: error)
         }
     }
 }
