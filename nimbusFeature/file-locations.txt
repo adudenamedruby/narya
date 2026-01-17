@@ -1,0 +1,3 @@
+~/Developer/firefox-ios/firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift
+~/Developer/firefox-ios/firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift
+~/Developer/firefox-ios/firefox-ios/Client/Nimbus/NimbusFeatureFlagLayer.swift

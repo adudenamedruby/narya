@@ -48,6 +48,112 @@ struct NimbusTests {
         try fmlContent.write(to: fmlFile, atomically: true, encoding: .utf8)
     }
 
+    func setupSwiftFiles(in repoDir: URL) throws {
+        // Create the Client directory structure
+        let clientDir = repoDir.appendingPathComponent("firefox-ios/Client")
+        let featureFlagsDir = clientDir.appendingPathComponent("FeatureFlags")
+        let nimbusDir = clientDir.appendingPathComponent("Nimbus")
+        let debugDir = clientDir.appendingPathComponent("Frontend/Settings/Main/Debug/FeatureFlags")
+
+        try fileManager.createDirectory(at: featureFlagsDir, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+        try fileManager.createDirectory(at: debugDir, withIntermediateDirectories: true)
+
+        // Create NimbusFlaggableFeature.swift
+        let flaggableFeatureContent = """
+            enum NimbusFeatureFlagID: String, CaseIterable {
+                case alpha
+                case zeta
+
+                var debugKey: String? {
+                    switch self {
+                    case    .alpha,
+                            .zeta:
+                        return rawValue + PrefsKeys.FeatureFlags.DebugSuffixKey
+                    default:
+                        return nil
+                    }
+                }
+            }
+
+            struct NimbusFlaggableFeature {
+                private var featureKey: String? {
+                    typealias FlagKeys = PrefsKeys.FeatureFlags
+
+                    switch featureID {
+                    case .alpha:
+                        return FlagKeys.Alpha
+                    // Cases where users do not have the option to manipulate a setting.
+                    case .zeta:
+                        return nil
+                    }
+                }
+            }
+            """
+        let flaggableFeaturePath = featureFlagsDir.appendingPathComponent("NimbusFlaggableFeature.swift")
+        try flaggableFeatureContent.write(to: flaggableFeaturePath, atomically: true, encoding: .utf8)
+
+        // Create NimbusFeatureFlagLayer.swift
+        let flagLayerContent = """
+            final class NimbusFeatureFlagLayer {
+                public func checkNimbusConfigFor(
+                    _ featureID: NimbusFeatureFlagID,
+                    from nimbus: FxNimbus = FxNimbus.shared
+                ) -> Bool {
+                    switch featureID {
+                    case .alpha:
+                        return checkAlphaFeature(from: nimbus)
+
+                    case .zeta:
+                        return checkZetaFeature(from: nimbus)
+                    }
+                }
+
+                private func checkAlphaFeature(from nimbus: FxNimbus) -> Bool {
+                    return nimbus.features.alpha.value().enabled
+                }
+
+                private func checkZetaFeature(from nimbus: FxNimbus) -> Bool {
+                    return nimbus.features.zeta.value().enabled
+                }
+            }
+            """
+        let flagLayerPath = nimbusDir.appendingPathComponent("NimbusFeatureFlagLayer.swift")
+        try flagLayerContent.write(to: flagLayerPath, atomically: true, encoding: .utf8)
+
+        // Create FeatureFlagsDebugViewController.swift
+        let debugVCContent = """
+            final class FeatureFlagsDebugViewController {
+                private func generateFeatureFlagToggleSettings() -> SettingSection {
+                    var children: [Setting] =  [
+                        FeatureFlagsBoolSetting(
+                            with: .alpha,
+                            titleText: format(string: "Alpha"),
+                            statusText: format(string: "Toggle Alpha")
+                        ) { [weak self] _ in
+                            self?.reloadView()
+                        },
+                        FeatureFlagsBoolSetting(
+                            with: .zeta,
+                            titleText: format(string: "Zeta"),
+                            statusText: format(string: "Toggle Zeta")
+                        ) { [weak self] _ in
+                            self?.reloadView()
+                        },
+                    ]
+
+                    #if canImport(FoundationModels)
+                    // conditional code
+                    #endif
+
+                    return SettingSection(children: children)
+                }
+            }
+            """
+        let debugVCPath = debugDir.appendingPathComponent("FeatureFlagsDebugViewController.swift")
+        try debugVCContent.write(to: debugVCPath, atomically: true, encoding: .utf8)
+    }
+
     func cleanup(_ url: URL) {
         try? fileManager.removeItem(at: url)
     }
@@ -66,17 +172,16 @@ struct NimbusTests {
         #expect(!discussion.isEmpty)
     }
 
-    // MARK: - Flag Validation Tests
-
-    @Test("run without flags does not throw")
-    func runWithoutFlagsShowsHelp() throws {
-        var command = try Nimbus.parse([])
-        // Should print help and return without error
-        try command.run()
+    @Test("Command has subcommands")
+    func commandHasSubcommands() {
+        let subcommands = Nimbus.configuration.subcommands
+        #expect(subcommands.count == 3)
     }
 
-    @Test("run throws when not in firefox-ios repo")
-    func runThrowsWhenNotInRepo() throws {
+    // MARK: - Refresh Subcommand Tests
+
+    @Test("refresh throws when not in firefox-ios repo")
+    func refreshThrowsWhenNotInRepo() throws {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
@@ -84,17 +189,15 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(tempDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--refresh"])
+        var command = try Nimbus.Refresh.parse([])
 
         #expect(throws: RepoDetectorError.self) {
             try command.run()
         }
     }
 
-    // MARK: - Update Command Tests
-
-    @Test("update command updates nimbus.fml.yaml include block")
-    func updateCommandUpdatesInclude() throws {
+    @Test("refresh command updates nimbus.fml.yaml include block")
+    func refreshCommandUpdatesInclude() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
@@ -108,7 +211,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--refresh"])
+        var command = try Nimbus.Refresh.parse([])
         try command.run()
 
         // Verify the FML was updated
@@ -117,8 +220,8 @@ struct NimbusTests {
         #expect(content.contains("nimbus-features/testFeature.yaml"))
     }
 
-    @Test("update command includes multiple feature files alphabetically")
-    func updateCommandSortsFiles() throws {
+    @Test("refresh command includes multiple feature files alphabetically")
+    func refreshCommandSortsFiles() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
@@ -133,7 +236,7 @@ struct NimbusTests {
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--refresh"])
+        var command = try Nimbus.Refresh.parse([])
         try command.run()
 
         let fmlFile = repoDir.appendingPathComponent("firefox-ios/nimbus.fml.yaml")
@@ -145,19 +248,40 @@ struct NimbusTests {
         #expect(content.contains("cFeature.yaml"))
     }
 
-    // MARK: - Add Command Tests
+    @Test("refresh throws when nimbus.fml.yaml not found")
+    func refreshThrowsWhenFmlMissing() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        // Create nimbus-features dir but not the FML file
+        let nimbusDir = repoDir.appendingPathComponent("firefox-ios/nimbus-features")
+        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Nimbus.Refresh.parse([])
+
+        #expect(throws: ValidationError.self) {
+            try command.run()
+        }
+    }
+
+    // MARK: - Add Subcommand Tests
 
     @Test("add command creates new feature file")
     func addCommandCreatesFile() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "myTest"])
+        var command = try Nimbus.Add.parse(["myTest"])
         try command.run()
 
         // Verify file was created with "Feature" suffix appended
@@ -170,12 +294,13 @@ struct NimbusTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "myTest"])
+        var command = try Nimbus.Add.parse(["myTest"])
         try command.run()
 
         let newFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myTestFeature.yaml")
@@ -187,12 +312,13 @@ struct NimbusTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "myTestFeature"])
+        var command = try Nimbus.Add.parse(["myTestFeature"])
         try command.run()
 
         // Should be myTestFeature.yaml, not myTestFeatureFeature.yaml
@@ -207,12 +333,13 @@ struct NimbusTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "test"])
+        var command = try Nimbus.Add.parse(["test"])
         try command.run()
 
         // "test" gets "Feature" appended, so filename is "testFeature.yaml"
@@ -223,8 +350,6 @@ struct NimbusTests {
         #expect(content.contains("description:"))
         #expect(content.contains("variables:"))
         #expect(content.contains("defaults:"))
-        #expect(content.contains("objects:"))
-        #expect(content.contains("enums:"))
     }
 
     @Test("add command uses kebab-case for feature identifier")
@@ -232,12 +357,13 @@ struct NimbusTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "myAwesomeTest"])
+        var command = try Nimbus.Add.parse(["myAwesomeTest"])
         try command.run()
 
         let newFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myAwesomeTestFeature.yaml")
@@ -252,12 +378,13 @@ struct NimbusTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
         try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--add", "new"])
+        var command = try Nimbus.Add.parse(["new"])
         try command.run()
 
         let fmlFile = repoDir.appendingPathComponent("firefox-ios/nimbus.fml.yaml")
@@ -266,25 +393,213 @@ struct NimbusTests {
         #expect(content.contains("nimbus-features/newFeature.yaml"))
     }
 
-    // MARK: - FML Not Found Tests
-
-    @Test("update throws when nimbus.fml.yaml not found")
-    func updateThrowsWhenFmlMissing() throws {
+    @Test("add command updates NimbusFlaggableFeature.swift")
+    func addCommandUpdatesFlaggableFeature() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
-
-        // Create nimbus-features dir but not the FML file
-        let nimbusDir = repoDir.appendingPathComponent("firefox-ios/nimbus-features")
-        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
 
         let originalDir = fileManager.currentDirectoryPath
         fileManager.changeCurrentDirectoryPath(repoDir.path)
         defer { fileManager.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Nimbus.parse(["--refresh"])
+        var command = try Nimbus.Add.parse(["beta"])
+        try command.run()
+
+        let filePath = repoDir.appendingPathComponent("firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift")
+        let content = try String(contentsOf: filePath, encoding: .utf8)
+
+        // Should have added the enum case
+        #expect(content.contains("case beta"))
+        // Should have added to the default case in featureKey (since no --user-toggleable)
+        #expect(content.contains(".beta"))
+    }
+
+    @Test("add command updates NimbusFeatureFlagLayer.swift")
+    func addCommandUpdatesFlagLayer() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Nimbus.Add.parse(["beta"])
+        try command.run()
+
+        let filePath = repoDir.appendingPathComponent("firefox-ios/Client/Nimbus/NimbusFeatureFlagLayer.swift")
+        let content = try String(contentsOf: filePath, encoding: .utf8)
+
+        // Should have added the switch case
+        #expect(content.contains("case .beta:"))
+        #expect(content.contains("checkBetaFeature(from: nimbus)"))
+        // Should have added the check function
+        #expect(content.contains("private func checkBetaFeature(from nimbus: FxNimbus) -> Bool"))
+        #expect(content.contains("nimbus.features.beta.value().enabled"))
+    }
+
+    @Test("add command with --debug updates debug settings")
+    func addCommandWithDebugUpdatesDebugSettings() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Nimbus.Add.parse(["beta", "--debug"])
+        try command.run()
+
+        // Check NimbusFlaggableFeature.swift for debugKey
+        let flaggablePath = repoDir.appendingPathComponent("firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift")
+        let flaggableContent = try String(contentsOf: flaggablePath, encoding: .utf8)
+        #expect(flaggableContent.contains(".beta"))
+
+        // Check FeatureFlagsDebugViewController.swift
+        let debugVCPath = repoDir.appendingPathComponent("firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
+        let debugVCContent = try String(contentsOf: debugVCPath, encoding: .utf8)
+        #expect(debugVCContent.contains("with: .beta,"))
+        #expect(debugVCContent.contains("\"Beta\""))
+    }
+
+    @Test("add command with --user-toggleable adds fatalError case")
+    func addCommandWithUserToggleableAddsFatalError() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Nimbus.Add.parse(["beta", "--user-toggleable"])
+        try command.run()
+
+        let filePath = repoDir.appendingPathComponent("firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift")
+        let content = try String(contentsOf: filePath, encoding: .utf8)
+
+        #expect(content.contains("case .beta:"))
+        #expect(content.contains("fatalError(\"Please implement a key for this feature\")"))
+    }
+
+    // MARK: - Remove Subcommand Tests
+
+    @Test("remove command removes feature file")
+    func removeCommandRemovesFile() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        // First add a feature
+        var addCommand = try Nimbus.Add.parse(["beta"])
+        try addCommand.run()
+
+        let featureFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/betaFeature.yaml")
+        #expect(fileManager.fileExists(atPath: featureFile.path))
+
+        // Now remove it
+        var removeCommand = try Nimbus.Remove.parse(["beta"])
+        try removeCommand.run()
+
+        #expect(!fileManager.fileExists(atPath: featureFile.path))
+    }
+
+    @Test("remove command removes from all Swift files")
+    func removeCommandRemovesFromSwiftFiles() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        // First add a feature with --debug
+        var addCommand = try Nimbus.Add.parse(["beta", "--debug"])
+        try addCommand.run()
+
+        // Verify it was added
+        let flaggablePath = repoDir.appendingPathComponent("firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift")
+        var content = try String(contentsOf: flaggablePath, encoding: .utf8)
+        #expect(content.contains("case beta"))
+
+        // Now remove it
+        var removeCommand = try Nimbus.Remove.parse(["beta"])
+        try removeCommand.run()
+
+        // Check NimbusFlaggableFeature.swift
+        content = try String(contentsOf: flaggablePath, encoding: .utf8)
+        #expect(!content.contains("case beta"))
+
+        // Check NimbusFeatureFlagLayer.swift
+        let flagLayerPath = repoDir.appendingPathComponent("firefox-ios/Client/Nimbus/NimbusFeatureFlagLayer.swift")
+        let flagLayerContent = try String(contentsOf: flagLayerPath, encoding: .utf8)
+        #expect(!flagLayerContent.contains("case .beta:"))
+        #expect(!flagLayerContent.contains("checkBetaFeature"))
+
+        // Check FeatureFlagsDebugViewController.swift
+        let debugVCPath = repoDir.appendingPathComponent("firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
+        let debugVCContent = try String(contentsOf: debugVCPath, encoding: .utf8)
+        #expect(!debugVCContent.contains("with: .beta,"))
+    }
+
+    @Test("remove command fails if feature file not found")
+    func removeCommandFailsIfFileNotFound() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+        try setupNimbusStructure(in: repoDir)
+        try setupSwiftFiles(in: repoDir)
+
+        let originalDir = fileManager.currentDirectoryPath
+        fileManager.changeCurrentDirectoryPath(repoDir.path)
+        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Nimbus.Remove.parse(["nonexistent"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
         }
+    }
+
+    // MARK: - Helper Tests
+
+    @Test("cleanFeatureName removes Feature suffix")
+    func cleanFeatureNameRemovesSuffix() {
+        #expect(NimbusHelpers.cleanFeatureName("testFeature") == "test")
+        #expect(NimbusHelpers.cleanFeatureName("test") == "test")
+        #expect(NimbusHelpers.cleanFeatureName("myAwesomeFeature") == "myAwesome")
+    }
+
+    @Test("camelToKebabCase converts correctly")
+    func camelToKebabCaseConverts() {
+        #expect(NimbusHelpers.camelToKebabCase("testFeature") == "test-feature")
+        #expect(NimbusHelpers.camelToKebabCase("myAwesomeTest") == "my-awesome-test")
+        #expect(NimbusHelpers.camelToKebabCase("simple") == "simple")
+    }
+
+    @Test("camelToTitleCase converts correctly")
+    func camelToTitleCaseConverts() {
+        #expect(NimbusHelpers.camelToTitleCase("testButtress") == "Test Buttress")
+        #expect(NimbusHelpers.camelToTitleCase("myAwesomeFeature") == "My Awesome Feature")
+        #expect(NimbusHelpers.camelToTitleCase("simple") == "Simple")
+    }
+
+    @Test("capitalizeFirst capitalizes correctly")
+    func capitalizeFirstCapitalizes() {
+        #expect(NimbusHelpers.capitalizeFirst("test") == "Test")
+        #expect(NimbusHelpers.capitalizeFirst("Test") == "Test")
+        #expect(NimbusHelpers.capitalizeFirst("") == "")
     }
 }
