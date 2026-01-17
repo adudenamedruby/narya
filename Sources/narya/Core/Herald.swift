@@ -17,9 +17,14 @@ enum Herald {
         Swift.print("\(prefix) \(message)")
     }
 
-    /// Warns with an error/warning message using 💥💍 prefix
+    /// Warns with a warning/error message using 💥💍 prefix.
+    /// Multi-line messages use ▒ for subsequent lines.
     static func warn(_ message: String) {
-        Swift.print("💥💍 \(message)")
+        let lines = message.components(separatedBy: .newlines)
+        for (index, line) in lines.enumerated() {
+            let prefix = index == 0 ? "💥💍" : "▒"
+            Swift.print("\(prefix) \(line)")
+        }
     }
 
     /// Resets the output state for a new command execution

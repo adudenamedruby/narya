@@ -19,7 +19,7 @@ If a command doesn't materially achieve one of these goals & the bonus goal, it 
 
 ## Requirements
 
-- macOS 13+
+- macOS 14+
 - Swift 6.0+
 
 To test on firefox-ios, you will also need the dependencies from that repo.
@@ -32,6 +32,11 @@ narya is available through brew.
 brew tap adudenamedruby/narya
 brew install narya
 ```
+
+**NOTE:** installing `narya` will also install several dependencies through `brew`, that are used for functionality:
+
+- (swiftlint)[https://github.com/realm/SwiftLint]
+- (danger)[https://github.com/danger/swift]
 
 ## Configuration
 

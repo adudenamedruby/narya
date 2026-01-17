@@ -41,7 +41,7 @@ struct Telemetry: ParsableCommand {
 
         // Can't specify both
         guard !(refresh && add != nil) else {
-            throw ValidationError("💥💍 Cannot specify both --refresh and --add. Choose one.")
+            throw ValidationError("Cannot specify both --refresh and --add. Choose one.")
         }
 
         Herald.reset()
@@ -72,7 +72,7 @@ struct Telemetry: ParsableCommand {
     private func runAdd(featureName: String, description: String?, repoRoot: URL) throws {
         // Validate camelCase format
         if featureName.contains("_") || featureName.contains("-") {
-            throw ValidationError("💥💍 Please enter a feature name in camelCase (not snake_case or kebab-case)")
+            throw ValidationError("Please enter a feature name in camelCase (not snake_case or kebab-case)")
         }
 
         let capitalizedTag = capitalizeFirst(featureName)

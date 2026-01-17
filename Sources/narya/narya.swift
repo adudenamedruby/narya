@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ArgumentParser
+import Foundation
 
 @main
 struct Narya: ParsableCommand {
@@ -36,5 +37,23 @@ struct Narya: ParsableCommand {
 
         // If no flags or subcommands provided, show help
         print(Narya.helpMessage())
+    }
+
+    /// Custom main to handle errors through Herald
+    static func main() {
+        do {
+            var command = try parseAsRoot()
+            try command.run()
+        } catch let error as CleanExit {
+            // Clean exits (help, version, etc.)
+            Self.exit(withError: error)
+        } catch let error as ValidationError {
+            // ArgumentParser validation errors - let it handle formatting
+            Self.exit(withError: error)
+        } catch {
+            // Report other errors through Herald
+            Herald.warn(String(describing: error))
+            Self.exit(withError: ExitCode.failure)
+        }
     }
 }

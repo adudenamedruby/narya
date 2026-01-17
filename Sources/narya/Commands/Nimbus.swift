@@ -83,7 +83,7 @@ struct Nimbus: ParsableCommand {
         let fmlPath = repoRoot.appendingPathComponent(Self.nimbusFmlPath)
 
         guard FileManager.default.fileExists(atPath: fmlPath.path) else {
-            throw ValidationError("💥💍 nimbus.fml.yaml not found at \(fmlPath.path)")
+            throw ValidationError("nimbus.fml.yaml not found at \(fmlPath.path)")
         }
 
         // Read current content

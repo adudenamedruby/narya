@@ -49,7 +49,7 @@ struct Version: ParsableCommand {
         // Check for conflicting options
         let optionCount = [bump != nil, set != nil, verify].filter { $0 }.count
         if optionCount > 1 {
-            throw ValidationError("💥💍 Cannot combine --bump, --set, and --verify. Choose one.")
+            throw ValidationError("Cannot combine --bump, --set, and --verify. Choose one.")
         }
 
         if let bumpType = bump {
@@ -244,7 +244,7 @@ struct Version: ParsableCommand {
     private func readVersion(repoRoot: URL) throws -> String {
         let versionFile = repoRoot.appendingPathComponent(Self.versionFileName)
         guard FileManager.default.fileExists(atPath: versionFile.path) else {
-            throw ValidationError("💥💍 version.txt not found at \(versionFile.path)")
+            throw ValidationError("version.txt not found at \(versionFile.path)")
         }
 
         return try String(contentsOf: versionFile, encoding: .utf8)
@@ -256,7 +256,7 @@ struct Version: ParsableCommand {
         guard components.count == 2,
               let major = Int(components[0]),
               let minor = Int(components[1]) else {
-            throw ValidationError("💥💍 Invalid version format '\(version)'. Expected X.Y where X and Y are numbers.")
+            throw ValidationError("Invalid version format '\(version)'. Expected X.Y where X and Y are numbers.")
         }
         return (major, minor)
     }

@@ -14,9 +14,9 @@ enum RunError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .appNotFound(let path):
-            return "💥💍 Built app not found at expected path: \(path). Build may have failed."
+            return "Built app not found at expected path: \(path). Build may have failed."
         case .simulatorOnly:
-            return "💥💍 The 'run' command only supports simulators. Use 'build --device' for device builds."
+            return "The 'run' command only supports simulators. Use 'build --device' for device builds."
         }
     }
 }

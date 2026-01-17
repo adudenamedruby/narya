@@ -61,9 +61,9 @@ enum BuildError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .projectNotFound(let path):
-            return "💥💍 Project not found at \(path). Run 'narya setup' first."
+            return "Project not found at \(path). Run 'narya setup' first."
         case .buildFailed(let exitCode):
-            return "💥💍 Build failed with exit code \(exitCode)."
+            return "Build failed with exit code \(exitCode)."
         }
     }
 }

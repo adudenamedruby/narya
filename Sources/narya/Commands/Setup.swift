@@ -74,7 +74,7 @@ enum SetupError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .failedToChangeDirectory(let path):
-            return "💥💍 Failed to change directory to \(path)."
+            return "Failed to change directory to \(path)."
         }
     }
 }

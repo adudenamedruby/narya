@@ -15,11 +15,11 @@ enum LintError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .swiftlintNotFound:
-            return "💥💍 swiftlint not found. Install it with 'brew install swiftlint'."
+            return "swiftlint not found. Install it with 'brew install swiftlint'."
         case .lintFailed(let exitCode):
-            return "💥💍 Linting failed with exit code \(exitCode)."
+            return "Linting failed with exit code \(exitCode)."
         case .noChangedFiles:
-            return "💥💍 No changed Swift files found."
+            return "No changed Swift files found."
         }
     }
 }

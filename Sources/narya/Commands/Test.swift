@@ -101,13 +101,13 @@ enum TestError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .testPlanNotAvailable(let plan, let product):
-            return "💥💍 Test plan '\(plan.rawValue)' is not available for \(product.scheme)."
+            return "Test plan '\(plan.rawValue)' is not available for \(product.scheme)."
         case .testBundleNotFound(let path):
-            return "💥💍 Test bundle not found at \(path). Run 'narya test --build-first' to build tests."
+            return "Test bundle not found at \(path). Run 'narya test --build-first' to build tests."
         case .xctestrunNotFound(let pattern):
-            return "💥💍 No xctestrun file found matching '\(pattern)'. Run 'narya build --for-testing' first."
+            return "No xctestrun file found matching '\(pattern)'. Run 'narya build --for-testing' first."
         case .testsFailed(let exitCode):
-            return "💥💍 Tests failed with exit code \(exitCode)."
+            return "Tests failed with exit code \(exitCode)."
         }
     }
 }

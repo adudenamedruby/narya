@@ -10,7 +10,7 @@ enum ToolCheckerError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .toolNotFound(let tool):
-            return "💥💍 \(tool) is not available. Please install \(tool) and try again."
+            return "\(tool) is not available. Please install \(tool) and try again."
         }
     }
 }

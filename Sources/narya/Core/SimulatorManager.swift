@@ -60,19 +60,19 @@ enum SimulatorManagerError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .simctlFailed(let reason):
-            return "💥💍 simctl command failed: \(reason)"
+            return "simctl command failed: \(reason)"
         case .noSimulatorsFound:
-            return "💥💍 No iOS simulators found. Please install simulators via Xcode."
+            return "No iOS simulators found. Please install simulators via Xcode."
         case .simulatorNotFound(let name):
-            return "💥💍 Simulator '\(name)' not found. Use --list-simulators to see available options."
+            return "Simulator '\(name)' not found. Use --list-simulators to see available options."
         case .parseError(let reason):
-            return "💥💍 Failed to parse simulator list: \(reason)"
+            return "Failed to parse simulator list: \(reason)"
         case .bootFailed(let reason):
-            return "💥💍 Failed to boot simulator: \(reason)"
+            return "Failed to boot simulator: \(reason)"
         case .installFailed(let reason):
-            return "💥💍 Failed to install app: \(reason)"
+            return "Failed to install app: \(reason)"
         case .launchFailed(let reason):
-            return "💥💍 Failed to launch app: \(reason)"
+            return "Failed to launch app: \(reason)"
         }
     }
 }
