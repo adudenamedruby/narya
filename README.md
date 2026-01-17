@@ -57,27 +57,17 @@ default_build_product: firefox
 
 ```
 Sources/narya/
-├── narya.swift               # Entry point (@main)
-├── Core/                     # Where tools and utilities should be placed
-│   ├── CommandHelpers.swift  # Shared utilities for command implementations
-│   ├── Configuration.swift   # App constants (name, version, etc.)
-│   ├── DeviceShorthand.swift # Simulator shorthand pattern matching (e.g., 17pro, air13)
-│   ├── Herald.swift          # Formatted output handling
-│   ├── RepoDetector.swift    # Validates firefox-ios repository, loads .narya.yaml
-│   ├── ShellRunner.swift     # Shell command execution
-│   ├── SimulatorManager.swift # iOS Simulator detection and management
-│   └── ToolChecker.swift     # Tool availability checks (git, node, npm, xcodebuild)
+├── narya.swift                 # Entry point (@main)
+├── Core/                       # Where tools and utilities should be placed
+│   ├── CommandHelpers.swift    # Shared utilities for command implementations
+│   ├── Configuration.swift     # App constants (name, version, etc.)
+│   ├── DeviceShorthand.swift   # Simulator shorthand pattern matching (e.g., 17pro, air13)
+│   ├── Herald.swift            # Formatted output handling
+│   ├── RepoDetector.swift      # Validates firefox-ios repository, loads .narya.yaml
+│   ├── ShellRunner.swift       # Shell command execution
+│   ├── SimulatorManager.swift  # iOS Simulator detection and management
+│   └── ToolChecker.swift       # Tool availability checks (git, node, npm, xcodebuild)
 └── Commands/
-    ├── Bootstrap.swift       # Bootstrap Firefox/Focus for development
-    ├── Build.swift           # Build Firefox/Focus/Klar with xcodebuild
-    ├── Clean.swift           # Clean build artifacts and caches
-    ├── Lint.swift            # Run SwiftLint on the codebase
-    ├── Nimbus.swift          # Manage Nimbus feature config files
-    ├── Run.swift             # Build and launch in iOS Simulator
-    ├── Setup.swift           # Clone + bootstrap command
-    ├── Telemetry.swift       # Update Glean telemetry config files
-    ├── Test.swift            # Run tests with xcodebuild
-    └── Version.swift         # Display or update version numbers
 ```
 
 ## Development & Contribution
@@ -142,11 +132,11 @@ All narya output is handled by the `Herald`. The maintain clarity between `narya
 | `narya test`      | Run tests for Firefox, Focus, or Klar                     |
 | `narya version`   | Display or update version numbers across the repository   |
 
-### bootstrap
+#### `bootstrap`
 
 Bootstraps the repository for development. By default, bootstraps the product specified in `.narya.yaml` (`default_bootstrap`), or Firefox if not configured.
 
-### build
+#### `build`
 
 Builds Firefox, Focus, or Klar for development using xcodebuild. By default, builds the product specified in `.narya.yaml` (`default_build_product`), or Firefox if not configured.
 
@@ -157,27 +147,27 @@ The simulator is auto-detected to use the latest iOS version with a standard iPh
 - iPhone: `17`, `17pro`, `17max`, `16e`, `air`, `se`
 - iPad: `air11`, `air13`, `pro11`, `pro13`, `mini`
 
-### clean
+#### `clean`
 
 Cleans up various cached or generated files.
 
-### lint
+#### `lint`
 
 Runs SwiftLint on the codebase. By default, lints only files changed compared to the main branch.
 
-### nimbus
+#### `nimbus`
 
 Manages Nimbus feature configuration files. Updates the `include` block in `nimbus.fml.yaml` with feature files from the `nimbus-features/` directory.
 
-### run
+#### `run`
 
 Builds and launches Firefox, Focus, or Klar in the iOS Simulator. This is equivalent to running `narya build` followed by installing and launching the app.
 
-### telemetry
+#### `telemetry`
 
 Updates Glean telemetry configuration files.
 
-### test
+#### `test`
 
 Runs tests for Firefox, Focus, or Klar using xcodebuild. By default, runs unit tests for the product specified in `.narya.yaml` (`default_build_product`), or Firefox if not configured.
 
@@ -189,7 +179,7 @@ Test plans available:
 - `performance` - Performance tests (Firefox only)
 - `full` - Full functional tests (Focus/Klar only)
 
-### version
+#### `version`
 
 Displays or updates version numbers across the repository. Without options, shows the current version and git SHA.
 
