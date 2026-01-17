@@ -78,8 +78,14 @@ struct Build: ParsableCommand {
             Builds the specified product using xcodebuild. By default, builds \
             Firefox for the iOS Simulator in debug configuration.
 
-            The simulator is auto-detected to use the latest iOS version with \
-            a standard iPhone model (non-Pro, non-Max).
+            SIMULATOR SHORTHAND PATTERNS:
+              17, 16e, 17pro, 17max    iPhone 17 / 16e / 17 Pro / 17 Pro Max
+              air, se                  iPhone Air / SE
+              air11, air13             iPad Air 11-inch / 13-inch
+              pro11, pro13             iPad Pro 11-inch / 13-inch
+              mini                     iPad mini
+
+            The latest iOS version is used unless --os is specified.
             """
     )
 
@@ -98,8 +104,8 @@ struct Build: ParsableCommand {
     @Flag(name: [.short, .long], help: "Build for a connected device instead of simulator.")
     var device = false
 
-    @Option(name: [.short, .long], help: "Simulator name (default: auto-detect latest).")
-    var simulator: String?
+    @Option(name: .long, help: "Simulator shorthand (e.g., 17, 17pro, air13, pro11, mini).")
+    var sim: String?
 
     @Flag(name: .long, help: "List available iOS simulators.")
     var listSimulators = false
@@ -215,11 +221,14 @@ struct Build: ParsableCommand {
     }
 
     private func resolveSimulator() throws -> SimulatorSelection {
-        if let simulatorName = simulator {
-            // User specified a simulator name
-            return try SimulatorManager.findSimulator(name: simulatorName, osVersion: os)
+        if let shorthand = sim {
+            // User specified a simulator shorthand
+            return try DeviceShorthand.findSimulator(
+                shorthand: shorthand,
+                osVersion: os
+            )
         } else {
-            // Auto-detect the best simulator
+            // Auto-detect the best simulator (default iPhone behavior)
             return try SimulatorManager.findDefaultSimulator()
         }
     }

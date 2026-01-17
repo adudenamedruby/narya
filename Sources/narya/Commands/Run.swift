@@ -32,10 +32,14 @@ struct Run: ParsableCommand {
             This is equivalent to running 'narya build' followed by launching \
             the app.
 
-            Examples:
-              narya run                      Build and run Firefox
-              narya run -p focus             Build and run Focus
-              narya run --simulator "iPhone 16 Pro"
+            SIMULATOR SHORTHAND PATTERNS:
+              17, 16e, 17pro, 17max    iPhone 17 / 16e / 17 Pro / 17 Pro Max
+              air, se                  iPhone Air / SE
+              air11, air13             iPad Air 11-inch / 13-inch
+              pro11, pro13             iPad Pro 11-inch / 13-inch
+              mini                     iPad mini
+
+            The latest iOS version is used unless --os is specified.
             """
     )
 
@@ -46,8 +50,11 @@ struct Run: ParsableCommand {
 
     // MARK: - Destination
 
-    @Option(name: .long, help: "Simulator name (default: auto-detect latest).")
-    var simulator: String?
+    @Option(name: .long, help: "Simulator shorthand (e.g., 17, 17pro, air13, pro11, mini).")
+    var sim: String?
+
+    @Flag(name: .long, help: "List available iOS simulators.")
+    var listSimulators = false
 
     @Option(name: .long, help: "iOS version for simulator (default: latest).")
     var os: String?
@@ -77,6 +84,13 @@ struct Run: ParsableCommand {
     // MARK: - Run
 
     mutating func run() throws {
+        // Handle --list-simulators separately (doesn't need repo validation)
+        if listSimulators {
+            Herald.reset()
+            try printSimulatorList()
+            return
+        }
+
         Herald.reset()
 
         // Validate we're in a firefox-ios repository
@@ -181,11 +195,14 @@ struct Run: ParsableCommand {
     }
 
     private func resolveSimulator() throws -> SimulatorSelection {
-        if let simulatorName = simulator {
-            // User specified a simulator name
-            return try SimulatorManager.findSimulator(name: simulatorName, osVersion: os)
+        if let shorthand = sim {
+            // User specified a simulator shorthand
+            return try DeviceShorthand.findSimulator(
+                shorthand: shorthand,
+                osVersion: os
+            )
         } else {
-            // Auto-detect the best simulator
+            // Auto-detect the best simulator (default iPhone behavior)
             return try SimulatorManager.findDefaultSimulator()
         }
     }
@@ -423,5 +440,41 @@ struct Run: ParsableCommand {
             return arg
         }
         return "\(command) \(escapedArgs.joined(separator: " \\\n    "))"
+    }
+
+    // MARK: - List Simulators
+
+    private func printSimulatorList() throws {
+        try ToolChecker.requireSimctl()
+
+        let simulatorsByRuntime = try SimulatorManager.listSimulators()
+
+        guard !simulatorsByRuntime.isEmpty else {
+            Herald.declare("No iOS simulators found. Please install simulators via Xcode.")
+            return
+        }
+
+        Herald.declare("Available iOS Simulators:")
+        Herald.declare("")
+
+        for (runtime, devices) in simulatorsByRuntime {
+            Herald.declare("\(runtime.name):")
+
+            for device in devices {
+                let bootedIndicator = device.isBooted ? " (Booted)" : ""
+                let udidShort = String(device.udid.prefix(8)) + "..."
+                Herald.declare("  \(device.name)\(bootedIndicator)".padding(toLength: 35, withPad: " ", startingAt: 0) + udidShort)
+            }
+
+            Herald.declare("")
+        }
+
+        // Show default
+        do {
+            let defaultSim = try SimulatorManager.findDefaultSimulator()
+            Herald.declare("Default: \(defaultSim.simulator.name) (iOS \(defaultSim.runtime.version))")
+        } catch {
+            // Ignore errors finding default
+        }
     }
 }

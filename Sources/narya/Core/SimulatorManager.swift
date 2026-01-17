@@ -130,7 +130,7 @@ enum SimulatorManager {
         return result
     }
 
-    /// Finds the best default simulator (latest iOS, non-Pro/non-Max iPhone)
+    /// Finds the best default simulator (latest iOS, numbered base iPhone preferred)
     static func findDefaultSimulator() throws -> SimulatorSelection {
         let simulatorsByRuntime = try listSimulators()
 
@@ -140,13 +140,19 @@ enum SimulatorManager {
 
         // Go through runtimes from newest to oldest
         for (runtime, devices) in simulatorsByRuntime {
-            // First, try to find a preferred (base model) iPhone
-            let preferredDevices = devices.filter { isPreferredSimulator($0.name) }
-            if let device = preferredDevices.first {
+            // First priority: numbered base iPhone (e.g., "iPhone 17", "iPhone 16")
+            let numberedDevices = devices.filter { isNumberedBaseIPhone($0.name) }
+            if let device = numberedDevices.sorted(by: { extractIPhoneNumber($0.name) > extractIPhoneNumber($1.name) }).first {
                 return SimulatorSelection(simulator: device, runtime: runtime)
             }
 
-            // If no preferred device, fall back to any iPhone
+            // Second priority: any base model iPhone (includes Air, SE, etc.)
+            let baseDevices = devices.filter { isPreferredSimulator($0.name) }
+            if let device = baseDevices.first {
+                return SimulatorSelection(simulator: device, runtime: runtime)
+            }
+
+            // Third priority: any iPhone
             let iPhones = devices.filter { $0.name.hasPrefix("iPhone") }
             if let device = iPhones.first {
                 return SimulatorSelection(simulator: device, runtime: runtime)
@@ -226,6 +232,31 @@ enum SimulatorManager {
     }
 
     // MARK: - Simulator Selection Logic
+
+    /// Determines if a simulator is a numbered base iPhone (e.g., "iPhone 17", "iPhone 16")
+    /// These are preferred over special models like iPhone Air or iPhone SE
+    static func isNumberedBaseIPhone(_ name: String) -> Bool {
+        // Pattern: "iPhone <number>" exactly (not Pro, Plus, etc.)
+        // Examples: "iPhone 17", "iPhone 16" - but NOT "iPhone 17 Pro" or "iPhone 16e"
+        let pattern = #"^iPhone \d+$"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return false
+        }
+        let range = NSRange(name.startIndex..., in: name)
+        return regex.firstMatch(in: name, range: range) != nil
+    }
+
+    /// Extracts the model number from an iPhone name (e.g., "iPhone 17" -> 17)
+    static func extractIPhoneNumber(_ name: String) -> Int {
+        let pattern = #"^iPhone (\d+)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []),
+              let match = regex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
+              let numberRange = Range(match.range(at: 1), in: name),
+              let number = Int(name[numberRange]) else {
+            return 0
+        }
+        return number
+    }
 
     /// Determines if a simulator name is a "preferred" base model (non-Pro, non-Max, etc.)
     static func isPreferredSimulator(_ name: String) -> Bool {
