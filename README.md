@@ -63,9 +63,11 @@ Sources/narya/
 │   ├── Configuration.swift     # App constants (name, version, etc.)
 │   ├── DeviceShorthand.swift   # Simulator shorthand pattern matching (e.g., 17pro, air13)
 │   ├── Herald.swift            # Formatted output handling
+│   ├── Products.swift          # Build product definitions (Firefox, Focus, Klar)
 │   ├── RepoDetector.swift      # Validates firefox-ios repository, loads .narya.yaml
 │   ├── ShellRunner.swift       # Shell command execution
 │   ├── SimulatorManager.swift  # iOS Simulator detection and management
+│   ├── StringUtils.swift       # String transformation utilities
 │   └── ToolChecker.swift       # Tool availability checks (git, node, npm, xcodebuild)
 └── Commands/
 ```
