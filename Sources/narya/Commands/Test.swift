@@ -197,7 +197,7 @@ struct Test: ParsableCommand {
         // Handle --list-simulators separately (doesn't need repo validation)
         if listSimulators {
             Herald.reset()
-            try printSimulatorList()
+            try CommandHelpers.printSimulatorList()
             return
         }
 
@@ -211,7 +211,7 @@ struct Test: ParsableCommand {
         try ToolChecker.requireSimctl()
 
         // Determine product
-        let testProduct = resolveProduct(from: repo.config)
+        let testProduct = CommandHelpers.resolveProduct(explicit: product, config: repo.config)
 
         // Validate test plan is available for this product
         guard plan.testPlanName(for: testProduct) != nil else {
@@ -225,7 +225,7 @@ struct Test: ParsableCommand {
         }
 
         // Determine simulator
-        let simulatorSelection = try resolveSimulator()
+        let simulatorSelection = try CommandHelpers.resolveSimulator(shorthand: sim, osVersion: os)
 
         // Handle --expose: print commands instead of running
         if expose {
@@ -271,32 +271,6 @@ struct Test: ParsableCommand {
 
     // MARK: - Private Methods
 
-    private func resolveProduct(from config: NaryaConfig) -> BuildProduct {
-        if let product = product {
-            return product
-        }
-
-        if let configDefault = config.defaultBuildProduct,
-           let parsed = BuildProduct(rawValue: configDefault) {
-            return parsed
-        }
-
-        return .firefox
-    }
-
-    private func resolveSimulator() throws -> SimulatorSelection {
-        if let shorthand = sim {
-            // User specified a simulator shorthand
-            return try DeviceShorthand.findSimulator(
-                shorthand: shorthand,
-                osVersion: os
-            )
-        } else {
-            // Auto-detect the best simulator (default iPhone behavior)
-            return try SimulatorManager.findDefaultSimulator()
-        }
-    }
-
     private func performBuildForTesting(
         product: BuildProduct,
         projectPath: URL,
@@ -323,24 +297,8 @@ struct Test: ParsableCommand {
             args.insert(contentsOf: ["-derivedDataPath", derivedData], at: args.count - 1)
         }
 
-        if quiet {
-            do {
-                _ = try ShellRunner.runAndCapture("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                if case .commandFailed(_, let exitCode) = error {
-                    throw BuildError.buildFailed(exitCode: exitCode)
-                }
-                throw error
-            }
-        } else {
-            do {
-                try ShellRunner.run("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                if case .commandFailed(_, let exitCode) = error {
-                    throw BuildError.buildFailed(exitCode: exitCode)
-                }
-                throw error
-            }
+        try CommandHelpers.runXcodebuild(arguments: args, quiet: quiet) { exitCode in
+            BuildError.buildFailed(exitCode: exitCode)
         }
 
         if !quiet {
@@ -393,24 +351,8 @@ struct Test: ParsableCommand {
         // Add test action
         args.append("test")
 
-        if quiet {
-            do {
-                _ = try ShellRunner.runAndCapture("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                if case .commandFailed(_, let exitCode) = error {
-                    throw TestError.testsFailed(exitCode: exitCode)
-                }
-                throw error
-            }
-        } else {
-            do {
-                try ShellRunner.run("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                if case .commandFailed(_, let exitCode) = error {
-                    throw TestError.testsFailed(exitCode: exitCode)
-                }
-                throw error
-            }
+        try CommandHelpers.runXcodebuild(arguments: args, quiet: quiet) { exitCode in
+            TestError.testsFailed(exitCode: exitCode)
         }
     }
 
@@ -442,7 +384,7 @@ struct Test: ParsableCommand {
             buildArgs.append("build-for-testing")
 
             print("# Build for testing")
-            print(formatCommand("xcodebuild", arguments: buildArgs))
+            print(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
             print("")
         }
 
@@ -481,53 +423,7 @@ struct Test: ParsableCommand {
         testArgs.append("test")
 
         print("# Run \(plan.displayName)")
-        print(formatCommand("xcodebuild", arguments: testArgs))
+        print(CommandHelpers.formatCommand("xcodebuild", arguments: testArgs))
     }
 
-    private func formatCommand(_ command: String, arguments: [String]) -> String {
-        let escapedArgs = arguments.map { arg -> String in
-            // Quote arguments that contain spaces or special characters
-            if arg.contains(" ") || arg.contains("=") || arg.contains(":") {
-                return "'\(arg)'"
-            }
-            return arg
-        }
-        return "\(command) \(escapedArgs.joined(separator: " \\\n    "))"
-    }
-
-    // MARK: - List Simulators
-
-    private func printSimulatorList() throws {
-        try ToolChecker.requireSimctl()
-
-        let simulatorsByRuntime = try SimulatorManager.listSimulators()
-
-        guard !simulatorsByRuntime.isEmpty else {
-            Herald.declare("No iOS simulators found. Please install simulators via Xcode.")
-            return
-        }
-
-        Herald.declare("Available iOS Simulators:")
-        Herald.declare("")
-
-        for (runtime, devices) in simulatorsByRuntime {
-            Herald.declare("\(runtime.name):")
-
-            for device in devices {
-                let bootedIndicator = device.isBooted ? " (Booted)" : ""
-                let udidShort = String(device.udid.prefix(8)) + "..."
-                Herald.declare("  \(device.name)\(bootedIndicator)".padding(toLength: 35, withPad: " ", startingAt: 0) + udidShort)
-            }
-
-            Herald.declare("")
-        }
-
-        // Show default
-        do {
-            let defaultSim = try SimulatorManager.findDefaultSimulator()
-            Herald.declare("Default: \(defaultSim.simulator.name) (iOS \(defaultSim.runtime.version))")
-        } catch {
-            // Ignore errors finding default
-        }
-    }
 }

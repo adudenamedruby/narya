@@ -34,49 +34,7 @@ struct LintTests {
         #expect(subcommands.contains { $0 == LintInfo.self })
     }
 
-    // MARK: - LintProduct Enum Tests
-
-    @Test("LintProduct enum has firefox case")
-    func productHasFirefox() {
-        let product = LintProduct(rawValue: "firefox")
-        #expect(product == .firefox)
-    }
-
-    @Test("LintProduct enum has focus case")
-    func productHasFocus() {
-        let product = LintProduct(rawValue: "focus")
-        #expect(product == .focus)
-    }
-
-    @Test("LintProduct firefox has correct directory")
-    func firefoxDirectory() {
-        #expect(LintProduct.firefox.directory == "firefox-ios")
-    }
-
-    @Test("LintProduct focus has correct directory")
-    func focusDirectory() {
-        #expect(LintProduct.focus.directory == "focus-ios")
-    }
-
     // MARK: - Argument Parsing Tests
-
-    @Test("Can parse product option short form")
-    func parseProductShort() throws {
-        let command = try Lint.parse(["-p", "focus"])
-        #expect(command.product == .focus)
-    }
-
-    @Test("Can parse product option long form")
-    func parseProductLong() throws {
-        let command = try Lint.parse(["--product", "firefox"])
-        #expect(command.product == .firefox)
-    }
-
-    @Test("Default product is firefox")
-    func defaultProduct() throws {
-        let command = try Lint.parse([])
-        #expect(command.product == .firefox)
-    }
 
     @Test("Can parse --all flag")
     func parseAllFlag() throws {
@@ -118,8 +76,7 @@ struct LintTests {
 
     @Test("Can parse multiple flags together")
     func parseMultipleFlags() throws {
-        let command = try Lint.parse(["-p", "focus", "--all", "--strict", "-q"])
-        #expect(command.product == .focus)
+        let command = try Lint.parse(["--all", "--strict", "-q"])
         #expect(command.all == true)
         #expect(command.strict == true)
         #expect(command.quiet == true)

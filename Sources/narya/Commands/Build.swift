@@ -143,7 +143,7 @@ struct Build: ParsableCommand {
         // Handle --list-simulators separately (doesn't need repo validation)
         if listSimulators {
             Herald.reset()
-            try printSimulatorList()
+            try CommandHelpers.printSimulatorList()
             return
         }
 
@@ -156,7 +156,7 @@ struct Build: ParsableCommand {
         try ToolChecker.requireXcodebuild()
 
         // Determine product
-        let buildProduct = resolveProduct(from: repo.config)
+        let buildProduct = CommandHelpers.resolveProduct(explicit: product, config: repo.config)
 
         // Validate project exists
         let projectPath = repo.root.appendingPathComponent(buildProduct.projectPath)
@@ -168,7 +168,7 @@ struct Build: ParsableCommand {
         var simulatorSelection: SimulatorSelection?
         if !device {
             try ToolChecker.requireSimctl()
-            simulatorSelection = try resolveSimulator()
+            simulatorSelection = try CommandHelpers.resolveSimulator(shorthand: sim, osVersion: os)
         }
 
         // Handle --expose: print commands instead of running
@@ -186,12 +186,12 @@ struct Build: ParsableCommand {
 
         // Clean if requested
         if clean {
-            try performClean(repoRoot: repo.root)
+            try CommandHelpers.cleanDerivedData(path: derivedData, quiet: quiet)
         }
 
         // Resolve packages
         if !skipResolve {
-            try resolvePackages(projectPath: projectPath)
+            try CommandHelpers.resolvePackages(projectPath: projectPath, quiet: quiet)
         }
 
         // Build
@@ -205,33 +205,6 @@ struct Build: ParsableCommand {
     }
 
     // MARK: - Private Methods
-
-    private func resolveProduct(from config: NaryaConfig) -> BuildProduct {
-        // Priority: command line flag > config file > default (firefox)
-        if let product = product {
-            return product
-        }
-
-        if let configDefault = config.defaultBuildProduct,
-           let parsed = BuildProduct(rawValue: configDefault) {
-            return parsed
-        }
-
-        return .firefox
-    }
-
-    private func resolveSimulator() throws -> SimulatorSelection {
-        if let shorthand = sim {
-            // User specified a simulator shorthand
-            return try DeviceShorthand.findSimulator(
-                shorthand: shorthand,
-                osVersion: os
-            )
-        } else {
-            // Auto-detect the best simulator (default iPhone behavior)
-            return try SimulatorManager.findDefaultSimulator()
-        }
-    }
 
     private func printBuildInfo(product: BuildProduct, simulator: SimulatorSelection?, repoRoot: URL) {
         if quiet { return }
@@ -256,47 +229,6 @@ struct Build: ParsableCommand {
         Herald.declare("")
     }
 
-    private func performClean(repoRoot: URL) throws {
-        if !quiet {
-            Herald.declare("Cleaning build folder...")
-        }
-
-        // Clean derived data if a custom path was specified
-        if let derivedDataPath = derivedData {
-            let ddURL = URL(fileURLWithPath: derivedDataPath)
-            if FileManager.default.fileExists(atPath: ddURL.path) {
-                try FileManager.default.removeItem(at: ddURL)
-            }
-        }
-
-        if !quiet {
-            Herald.declare("Clean complete.")
-        }
-    }
-
-    private func resolvePackages(projectPath: URL) throws {
-        if !quiet {
-            Herald.declare("Resolving Swift Package dependencies...")
-        }
-
-        let args = [
-            "-resolvePackageDependencies",
-            "-onlyUsePackageVersionsFromResolvedFile",
-            "-project", projectPath.path
-        ]
-
-        if quiet {
-            _ = try ShellRunner.runAndCapture("xcodebuild", arguments: args)
-        } else {
-            try ShellRunner.run("xcodebuild", arguments: args)
-        }
-
-        if !quiet {
-            Herald.declare("Package resolution complete.")
-            Herald.declare("")
-        }
-    }
-
     private func performBuild(
         product: BuildProduct,
         projectPath: URL,
@@ -315,25 +247,8 @@ struct Build: ParsableCommand {
         // Add build action
         args.append(forTesting ? "build-for-testing" : "build")
 
-        if quiet {
-            do {
-                _ = try ShellRunner.runAndCapture("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                // Re-throw with more context
-                if case .commandFailed(_, let exitCode) = error {
-                    throw BuildError.buildFailed(exitCode: exitCode)
-                }
-                throw error
-            }
-        } else {
-            do {
-                try ShellRunner.run("xcodebuild", arguments: args)
-            } catch let error as ShellRunnerError {
-                if case .commandFailed(_, let exitCode) = error {
-                    throw BuildError.buildFailed(exitCode: exitCode)
-                }
-                throw error
-            }
+        try CommandHelpers.runXcodebuild(arguments: args, quiet: quiet) { exitCode in
+            BuildError.buildFailed(exitCode: exitCode)
         }
     }
 
@@ -382,42 +297,6 @@ struct Build: ParsableCommand {
         return args
     }
 
-    // MARK: - List Simulators
-
-    private func printSimulatorList() throws {
-        try ToolChecker.requireSimctl()
-
-        let simulatorsByRuntime = try SimulatorManager.listSimulators()
-
-        guard !simulatorsByRuntime.isEmpty else {
-            Herald.declare("No iOS simulators found. Please install simulators via Xcode.")
-            return
-        }
-
-        Herald.declare("Available iOS Simulators:")
-        Herald.declare("")
-
-        for (runtime, devices) in simulatorsByRuntime {
-            Herald.declare("\(runtime.name):")
-
-            for device in devices {
-                let bootedIndicator = device.isBooted ? " (Booted)" : ""
-                let udidShort = String(device.udid.prefix(8)) + "..."
-                Herald.declare("  \(device.name)\(bootedIndicator)".padding(toLength: 35, withPad: " ", startingAt: 0) + udidShort)
-            }
-
-            Herald.declare("")
-        }
-
-        // Show default
-        do {
-            let defaultSim = try SimulatorManager.findDefaultSimulator()
-            Herald.declare("Default: \(defaultSim.simulator.name) (iOS \(defaultSim.runtime.version))")
-        } catch {
-            // Ignore errors finding default
-        }
-    }
-
     // MARK: - Expose Command
 
     private func printExposedCommands(
@@ -433,7 +312,7 @@ struct Build: ParsableCommand {
                 "-project", projectPath.path
             ]
             print("# Resolve Swift Package dependencies")
-            print(formatCommand("xcodebuild", arguments: resolveArgs))
+            print(CommandHelpers.formatCommand("xcodebuild", arguments: resolveArgs))
             print("")
         }
 
@@ -446,17 +325,6 @@ struct Build: ParsableCommand {
         buildArgs.append(forTesting ? "build-for-testing" : "build")
 
         print("# Build \(product.scheme)")
-        print(formatCommand("xcodebuild", arguments: buildArgs))
-    }
-
-    private func formatCommand(_ command: String, arguments: [String]) -> String {
-        let escapedArgs = arguments.map { arg -> String in
-            // Quote arguments that contain spaces or special characters
-            if arg.contains(" ") || arg.contains("=") {
-                return "'\(arg)'"
-            }
-            return arg
-        }
-        return "\(command) \(escapedArgs.joined(separator: " \\\n    "))"
+        print(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
     }
 }

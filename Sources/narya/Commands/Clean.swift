@@ -104,7 +104,7 @@ struct Clean: ParsableCommand {
         if build || all {
             let buildDir = repoRoot.appendingPathComponent(".build")
             print("# Remove .build directory")
-            print(formatCommand("rm", arguments: ["-rf", buildDir.path]))
+            print(CommandHelpers.formatCommand("rm", arguments: ["-rf", buildDir.path]))
             print("")
         }
 
@@ -112,26 +112,16 @@ struct Clean: ParsableCommand {
             let derivedDataDir = fileManager.homeDirectoryForCurrentUser
                 .appendingPathComponent("Library/Developer/Xcode/DerivedData")
             print("# Remove DerivedData directory")
-            print(formatCommand("rm", arguments: ["-rf", derivedDataDir.path]))
+            print(CommandHelpers.formatCommand("rm", arguments: ["-rf", derivedDataDir.path]))
             print("")
         }
 
         if packages || all {
             print("# Reset Swift packages")
-            print(formatCommand("swift", arguments: ["package", "reset"]))
+            print(CommandHelpers.formatCommand("swift", arguments: ["package", "reset"]))
             print("")
             print("# Resolve Swift packages")
-            print(formatCommand("swift", arguments: ["package", "resolve"]))
+            print(CommandHelpers.formatCommand("swift", arguments: ["package", "resolve"]))
         }
-    }
-
-    private func formatCommand(_ command: String, arguments: [String]) -> String {
-        let escapedArgs = arguments.map { arg -> String in
-            if arg.contains(" ") || arg.contains("=") {
-                return "'\(arg)'"
-            }
-            return arg
-        }
-        return "\(command) \(escapedArgs.joined(separator: " \\\n    "))"
     }
 }

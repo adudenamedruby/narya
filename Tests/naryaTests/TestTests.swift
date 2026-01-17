@@ -188,10 +188,10 @@ struct TestCommandTests {
         #expect(command.filter == "MyTestClass")
     }
 
-    @Test("Can parse simulator option")
-    func parseSimulator() throws {
-        let command = try Test.parse(["--simulator", "iPhone 16 Pro"])
-        #expect(command.simulator == "iPhone 16 Pro")
+    @Test("Can parse sim option")
+    func parseSim() throws {
+        let command = try Test.parse(["--sim", "17pro"])
+        #expect(command.sim == "17pro")
     }
 
     @Test("Can parse os option")
@@ -242,7 +242,7 @@ struct TestCommandTests {
         #expect(command.product == nil)
         #expect(command.plan == .unit)
         #expect(command.filter == nil)
-        #expect(command.simulator == nil)
+        #expect(command.sim == nil)
         #expect(command.os == nil)
         #expect(command.buildFirst == false)
         #expect(command.derivedData == nil)

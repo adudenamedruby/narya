@@ -267,7 +267,7 @@ struct Lint: ParsableCommand {
             print("BASE=$(git merge-base HEAD main)")
             print("")
             print("# Find changed Swift files")
-            print(formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
+            print(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
             print("")
 
             // Show swiftlint command for each file
@@ -286,18 +286,8 @@ struct Lint: ParsableCommand {
             }
 
             print("# Lint each changed file")
-            print(formatCommand("swiftlint", arguments: args))
+            print(CommandHelpers.formatCommand("swiftlint", arguments: args))
         }
-    }
-
-    private func formatCommand(_ command: String, arguments: [String]) -> String {
-        let escapedArgs = arguments.map { arg -> String in
-            if arg.contains(" ") || arg.contains("=") {
-                return "'\(arg)'"
-            }
-            return arg
-        }
-        return "\(command) \(escapedArgs.joined(separator: " \\\n    "))"
     }
 }
 

@@ -62,10 +62,10 @@ struct RunTests {
         #expect(command.product == .klar)
     }
 
-    @Test("Can parse simulator option")
-    func parseSimulator() throws {
-        let command = try Run.parse(["--simulator", "iPhone 16 Pro"])
-        #expect(command.simulator == "iPhone 16 Pro")
+    @Test("Can parse sim option")
+    func parseSim() throws {
+        let command = try Run.parse(["--sim", "17pro"])
+        #expect(command.sim == "17pro")
     }
 
     @Test("Can parse os option")
@@ -120,7 +120,7 @@ struct RunTests {
     func defaultValues() throws {
         let command = try Run.parse([])
         #expect(command.product == nil)
-        #expect(command.simulator == nil)
+        #expect(command.sim == nil)
         #expect(command.os == nil)
         #expect(command.configuration == nil)
         #expect(command.derivedData == nil)
