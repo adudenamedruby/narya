@@ -35,7 +35,7 @@ struct Telemetry: ParsableCommand {
     mutating func run() throws {
         // If neither flag is specified, show help
         guard refresh || add != nil else {
-            print(Telemetry.helpMessage())
+            Herald.raw(Telemetry.helpMessage())
             return
         }
 

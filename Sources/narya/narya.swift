@@ -45,12 +45,12 @@ struct Narya: ParsableCommand {
         }
 
         if about {
-            print(Configuration.aboutText)
+            Herald.raw(Configuration.aboutText)
             return
         }
 
         // If no flags or subcommands provided, show help
-        print(Narya.helpMessage())
+        Herald.raw(Narya.helpMessage())
     }
 
     /// Custom main to handle errors through Herald

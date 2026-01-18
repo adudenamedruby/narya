@@ -29,7 +29,7 @@ struct Clean: ParsableCommand {
     mutating func run() throws {
         // If no flags specified, show help
         guard packages || build || derivedData || all else {
-            print(Clean.helpMessage())
+            Herald.raw(Clean.helpMessage())
             return
         }
 

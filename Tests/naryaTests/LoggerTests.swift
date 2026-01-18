@@ -160,6 +160,7 @@ struct LoggerTests {
         // Note: Due to @autoclosure, the expression is captured but may still be evaluated
         // The key benefit is avoiding string interpolation overhead
         // This test verifies the API works correctly
+        _ = evaluated
     }
 
     // MARK: - Level Filtering Tests

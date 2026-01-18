@@ -18,7 +18,7 @@ extension Lint {
             Herald.declare("SwiftLint Version:", isNewCommand: true)
             try ShellRunner.run("swiftlint", arguments: ["version"])
 
-            print("")
+            Herald.declare("")
 
             Herald.declare("Available Rules:")
             try ShellRunner.run("swiftlint", arguments: ["rules"])

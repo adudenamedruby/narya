@@ -28,7 +28,7 @@ struct Doctor: ParsableCommand {
         // Optional tools
         checkTool("swiftlint", versionArgs: ["version"], required: false, issues: &issues)
 
-        print("")
+        Herald.declare("")
 
         // Repository context (optional)
         checkRepository(issues: &issues)
@@ -145,7 +145,7 @@ struct Doctor: ParsableCommand {
 
         } catch {
             printCheck(passed: false, tool: "firefox-ios repo", detail: "not detected")
-            print("▒   Run from a firefox-ios repository for full checks")
+            Herald.declare("Run from a firefox-ios repository for full checks")
         }
     }
 

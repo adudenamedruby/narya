@@ -164,9 +164,9 @@ struct Version: ParsableCommand {
             Herald.declare("Version mismatches found:", asError: true, asConclusion: true)
             for mismatch in mismatches {
                 if let found = mismatch.found {
-                    print("  - \(mismatch.file): found '\(found)'")
+                    Herald.declare("  - \(mismatch.file): found '\(found)'")
                 } else {
-                    print("  - \(mismatch.file): version not found")
+                    Herald.declare("  - \(mismatch.file): version not found")
                 }
             }
             throw ExitCode.failure
