@@ -309,4 +309,4 @@ Matching behavior:
 
 ## License
 
-Mozilla Public License 2.0
+[Mozilla Public License 2.0](https://github.com/adudenamedruby/narya?tab=MPL-2.0-1-ov-file)
