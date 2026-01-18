@@ -63,35 +63,35 @@ struct CommandHelpersTests {
 
     @Test("resolveProduct returns explicit product when provided")
     func resolveProductExplicit() {
-        let config = NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "firefox")
+        let config = MergedConfig(projectConfig: NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "firefox"))
         let result = CommandHelpers.resolveProduct(explicit: .focus, config: config)
         #expect(result == .focus)
     }
 
     @Test("resolveProduct returns config default when no explicit")
     func resolveProductFromConfig() {
-        let config = NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "focus")
+        let config = MergedConfig(projectConfig: NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "focus"))
         let result = CommandHelpers.resolveProduct(explicit: nil, config: config)
         #expect(result == .focus)
     }
 
     @Test("resolveProduct returns firefox as fallback default")
     func resolveProductDefault() {
-        let config = NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: nil)
+        let config = MergedConfig(projectConfig: NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: nil))
         let result = CommandHelpers.resolveProduct(explicit: nil, config: config)
         #expect(result == .firefox)
     }
 
     @Test("resolveProduct handles invalid config value")
     func resolveProductInvalidConfig() {
-        let config = NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "invalid")
+        let config = MergedConfig(projectConfig: NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "invalid"))
         let result = CommandHelpers.resolveProduct(explicit: nil, config: config)
         #expect(result == .firefox) // Falls back to default
     }
 
     @Test("resolveProduct explicit overrides config")
     func resolveProductExplicitOverridesConfig() {
-        let config = NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "focus")
+        let config = MergedConfig(projectConfig: NaryaConfig(project: "firefox-ios", defaultBootstrap: nil, defaultBuildProduct: "focus"))
         let result = CommandHelpers.resolveProduct(explicit: .klar, config: config)
         #expect(result == .klar)
     }

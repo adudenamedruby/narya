@@ -36,3 +36,16 @@ struct ConfigurationTests {
         #expect(Configuration.markerFileName == ".narya.yaml")
     }
 }
+
+@Suite("DefaultConfig Tests")
+struct DefaultConfigTests {
+    @Test("DefaultConfig has correct default bootstrap value")
+    func defaultBootstrap() {
+        #expect(DefaultConfig.defaultBootstrap == "firefox")
+    }
+
+    @Test("DefaultConfig has correct default build product value")
+    func defaultBuildProduct() {
+        #expect(DefaultConfig.defaultBuildProduct == "firefox")
+    }
+}

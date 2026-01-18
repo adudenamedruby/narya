@@ -20,9 +20,23 @@ struct NaryaConfig: Codable {
     }
 }
 
+/// Merged configuration combining project config with bundled defaults.
+/// Project config (.narya.yaml) takes precedence over DefaultConfig values.
+struct MergedConfig {
+    let project: String
+    let defaultBootstrap: String
+    let defaultBuildProduct: String
+
+    init(projectConfig: NaryaConfig) {
+        self.project = projectConfig.project
+        self.defaultBootstrap = projectConfig.defaultBootstrap ?? DefaultConfig.defaultBootstrap
+        self.defaultBuildProduct = projectConfig.defaultBuildProduct ?? DefaultConfig.defaultBuildProduct
+    }
+}
+
 /// Result of successful repository validation.
 struct RepoInfo {
-    let config: NaryaConfig
+    let config: MergedConfig
     let root: URL
 }
 
@@ -120,6 +134,7 @@ enum RepoDetector {
             )
         }
 
-        return RepoInfo(config: config, root: repoRoot)
+        let mergedConfig = MergedConfig(projectConfig: config)
+        return RepoInfo(config: mergedConfig, root: repoRoot)
     }
 }

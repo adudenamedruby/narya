@@ -160,19 +160,14 @@ enum CommandHelpers {
 
     // MARK: - Product Resolution
 
-    /// Resolves product from explicit value, config, or default
-    static func resolveProduct(explicit: BuildProduct?, config: NaryaConfig) -> BuildProduct {
-        // Priority: command line flag > config file > default (firefox)
+    /// Resolves product from explicit value or config (which includes defaults)
+    static func resolveProduct(explicit: BuildProduct?, config: MergedConfig) -> BuildProduct {
+        // Priority: command line flag > merged config (which already has defaults applied)
         if let explicit = explicit {
             return explicit
         }
 
-        if let configDefault = config.defaultBuildProduct,
-           let parsed = BuildProduct(rawValue: configDefault) {
-            return parsed
-        }
-
-        return .firefox
+        return BuildProduct(rawValue: config.defaultBuildProduct) ?? .firefox
     }
 
     // MARK: - Package Resolution

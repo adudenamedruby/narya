@@ -213,3 +213,60 @@ struct RepoDetectorTests {
         #expect(error.description.contains(Configuration.markerFileName))
     }
 }
+
+@Suite("MergedConfig Tests")
+struct MergedConfigTests {
+    @Test("MergedConfig uses project config values when provided")
+    func usesProjectConfigValues() {
+        let projectConfig = NaryaConfig(
+            project: "firefox-ios",
+            defaultBootstrap: "focus",
+            defaultBuildProduct: "focus"
+        )
+        let merged = MergedConfig(projectConfig: projectConfig)
+
+        #expect(merged.project == "firefox-ios")
+        #expect(merged.defaultBootstrap == "focus")
+        #expect(merged.defaultBuildProduct == "focus")
+    }
+
+    @Test("MergedConfig uses defaults when project config values are nil")
+    func usesDefaultsWhenNil() {
+        let projectConfig = NaryaConfig(
+            project: "firefox-ios",
+            defaultBootstrap: nil,
+            defaultBuildProduct: nil
+        )
+        let merged = MergedConfig(projectConfig: projectConfig)
+
+        #expect(merged.project == "firefox-ios")
+        #expect(merged.defaultBootstrap == DefaultConfig.defaultBootstrap)
+        #expect(merged.defaultBuildProduct == DefaultConfig.defaultBuildProduct)
+    }
+
+    @Test("MergedConfig handles partial override - bootstrap only")
+    func partialOverrideBootstrapOnly() {
+        let projectConfig = NaryaConfig(
+            project: "firefox-ios",
+            defaultBootstrap: "focus",
+            defaultBuildProduct: nil
+        )
+        let merged = MergedConfig(projectConfig: projectConfig)
+
+        #expect(merged.defaultBootstrap == "focus")
+        #expect(merged.defaultBuildProduct == DefaultConfig.defaultBuildProduct)
+    }
+
+    @Test("MergedConfig handles partial override - build product only")
+    func partialOverrideBuildProductOnly() {
+        let projectConfig = NaryaConfig(
+            project: "firefox-ios",
+            defaultBootstrap: nil,
+            defaultBuildProduct: "focus"
+        )
+        let merged = MergedConfig(projectConfig: projectConfig)
+
+        #expect(merged.defaultBootstrap == DefaultConfig.defaultBootstrap)
+        #expect(merged.defaultBuildProduct == "focus")
+    }
+}

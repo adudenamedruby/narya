@@ -138,13 +138,9 @@ struct Doctor: ParsableCommand {
             // Check git hooks
             checkGitHooks(repoRoot: repo.root, issues: &issues)
 
-            // Check .narya.yaml configuration
-            if let defaultBuildProduct = repo.config.defaultBuildProduct {
-                printCheck(passed: true, tool: "default build", detail: defaultBuildProduct)
-            }
-            if let defaultBootstrap = repo.config.defaultBootstrap {
-                printCheck(passed: true, tool: "default bootstrap", detail: defaultBootstrap)
-            }
+            // Display merged configuration (defaults are always present)
+            printCheck(passed: true, tool: "default build", detail: repo.config.defaultBuildProduct)
+            printCheck(passed: true, tool: "default bootstrap", detail: repo.config.defaultBootstrap)
 
         } catch {
             printCheck(passed: false, tool: "firefox-ios repo", detail: "not detected")

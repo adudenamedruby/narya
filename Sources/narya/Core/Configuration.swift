@@ -50,3 +50,10 @@ enum Configuration {
         """
     }
 }
+
+/// Bundled default values that are merged with project configuration.
+/// Project config (.narya.yaml) takes precedence over these defaults.
+enum DefaultConfig {
+    static let defaultBootstrap = "firefox"
+    static let defaultBuildProduct = "firefox"
+}

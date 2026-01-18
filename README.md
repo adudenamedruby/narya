@@ -40,18 +40,42 @@ brew install narya
 
 ## Configuration
 
-narya uses a `.narya.yaml` file in the repository root for configuration and validation that it's in the correct repository
+narya uses a `.narya.yaml` file in the repository root for configuration and validation that it's in the correct repository.
+
+### Merged Configuration
+
+narya uses a merged configuration system where bundled defaults are combined with your project's `.narya.yaml`. Project config values take precedence over bundled defaults.
+
+**Bundled defaults:**
+- `default_bootstrap`: `firefox`
+- `default_build_product`: `firefox`
+
+This means you only need to specify values in `.narya.yaml` when you want to override the defaults.
+
+### Configuration File
 
 ```yaml
 # Required: identifies this as a narya-compatible repository
 project: firefox-ios
 
 # Optional: default product for bootstrap command (firefox or focus)
+# If not specified, uses bundled default: firefox
 default_bootstrap: firefox
 
 # Optional: default product for build/run commands (firefox, focus, or klar)
+# If not specified, uses bundled default: firefox
 default_build_product: firefox
 ```
+
+### Minimal Configuration
+
+Since defaults are bundled, a minimal `.narya.yaml` only needs the required `project` field:
+
+```yaml
+project: firefox-ios
+```
+
+This will use `firefox` as the default for both bootstrap and build commands.
 
 ## Architecture
 

@@ -51,16 +51,10 @@ struct Bootstrap: ParsableCommand {
             try bootstrapFirefox(repoRoot: repo.root)
             try bootstrapFocus(repoRoot: repo.root)
         } else {
-            // Use explicit product, config default, or fallback to firefox
-            let defaultProduct: Product
-            if let configDefault = repo.config.defaultBootstrap,
-               let parsed = Product(rawValue: configDefault) {
-                defaultProduct = parsed
-            } else {
-                defaultProduct = .firefox
-            }
+            // Use explicit product or config default (which already has defaults applied)
+            let resolvedProduct = product ?? Product(rawValue: repo.config.defaultBootstrap) ?? .firefox
 
-            switch product ?? defaultProduct {
+            switch resolvedProduct {
             case .firefox:
                 try bootstrapFirefox(repoRoot: repo.root)
             case .focus:
