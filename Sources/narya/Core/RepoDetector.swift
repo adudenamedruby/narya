@@ -47,6 +47,7 @@ enum RepoDetectorError: Error, CustomStringConvertible {
     case markerNotFound
     case invalidMarkerFile(String)
     case unexpectedProject(expected: String, found: String)
+    case noValidRemote
 
     var description: String {
         switch self {
@@ -68,6 +69,15 @@ enum RepoDetectorError: Error, CustomStringConvertible {
                 Unexpected project in \(Configuration.markerFileName).
                 Expected: \(expected), found: \(found)
                 """
+        case .noValidRemote:
+            return """
+                No git remote pointing to mozilla-mobile/firefox-ios found.
+                Expected a remote with URL matching:
+                  - git@github.com:mozilla-mobile/firefox-ios.git (SSH)
+                  - https://github.com/mozilla-mobile/firefox-ios.git (HTTPS)
+                If this is a fork, add an upstream remote:
+                  git remote add upstream git@github.com:mozilla-mobile/firefox-ios.git
+                """
         }
     }
 }
@@ -80,8 +90,10 @@ enum RepoDetectorError: Error, CustomStringConvertible {
 /// 1. Current directory is inside a git repository
 /// 2. Repository root contains .narya.yaml marker file
 /// 3. Marker file specifies the expected project ("firefox-ios")
+/// 4. At least one git remote points to mozilla-mobile/firefox-ios (warning if missing)
 enum RepoDetector {
     static let expectedProject = "firefox-ios"
+    static let expectedRemoteIdentifier = "mozilla-mobile/firefox-ios"
 
     /// Finds the git repository root using `git rev-parse --show-toplevel`.
     /// Returns nil if not inside a git repository.
@@ -93,6 +105,24 @@ enum RepoDetector {
             return URL(fileURLWithPath: path)
         } catch {
             return nil
+        }
+    }
+
+    /// Checks if any git remote points to mozilla-mobile/firefox-ios.
+    /// This validates the repository origin, supporting both direct clones and forks
+    /// (where upstream points to mozilla-mobile).
+    /// - Parameter repoRoot: The root directory of the git repository
+    /// - Returns: true if any remote URL contains the expected identifier
+    static func hasValidRemote(repoRoot: URL) -> Bool {
+        do {
+            let output = try ShellRunner.runAndCapture(
+                "git",
+                arguments: ["remote", "-v"],
+                workingDirectory: repoRoot
+            )
+            return output.contains(expectedRemoteIdentifier)
+        } catch {
+            return false
         }
     }
 
@@ -132,6 +162,21 @@ enum RepoDetector {
                 expected: expectedProject,
                 found: config.project
             )
+        }
+
+        // Check git remotes for mozilla-mobile/firefox-ios
+        // TODO: Decide whether this should be a hard error or warning.
+        // Currently a warning to support edge cases (enterprise mirrors, offline dev).
+        // Uncomment the throw below to make it a hard error instead.
+        if !hasValidRemote(repoRoot: repoRoot) {
+            Herald.declare(
+                "No git remote pointing to \(expectedRemoteIdentifier) found.\n" +
+                "If this is a fork, consider adding an upstream remote:\n" +
+                "  git remote add upstream git@github.com:mozilla-mobile/firefox-ios.git",
+                asError: true,
+                isNewCommand: true
+            )
+            // throw RepoDetectorError.noValidRemote
         }
 
         let mergedConfig = MergedConfig(projectConfig: config)

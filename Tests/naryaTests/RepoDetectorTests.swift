@@ -212,6 +212,90 @@ struct RepoDetectorTests {
         let error = RepoDetectorError.markerNotFound
         #expect(error.description.contains(Configuration.markerFileName))
     }
+
+    @Test("RepoDetectorError.noValidRemote has correct description")
+    func noValidRemoteDescription() {
+        let error = RepoDetectorError.noValidRemote
+        #expect(error.description.contains("mozilla-mobile/firefox-ios"))
+        #expect(error.description.contains("git remote add upstream"))
+    }
+
+    // MARK: - Remote Validation Tests
+
+    @Test("hasValidRemote returns false when no remotes exist")
+    func hasValidRemoteReturnsFalseWithNoRemotes() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        let result = RepoDetector.hasValidRemote(repoRoot: repoDir)
+        #expect(result == false)
+    }
+
+    @Test("hasValidRemote returns true when origin points to mozilla-mobile (SSH)")
+    func hasValidRemoteReturnsTrueForMozillaOriginSSH() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        try ShellRunner.run(
+            "git",
+            arguments: ["remote", "add", "origin", "git@github.com:mozilla-mobile/firefox-ios.git"],
+            workingDirectory: repoDir
+        )
+
+        let result = RepoDetector.hasValidRemote(repoRoot: repoDir)
+        #expect(result == true)
+    }
+
+    @Test("hasValidRemote returns true when origin points to mozilla-mobile (HTTPS)")
+    func hasValidRemoteReturnsTrueForMozillaOriginHTTPS() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        try ShellRunner.run(
+            "git",
+            arguments: ["remote", "add", "origin", "https://github.com/mozilla-mobile/firefox-ios.git"],
+            workingDirectory: repoDir
+        )
+
+        let result = RepoDetector.hasValidRemote(repoRoot: repoDir)
+        #expect(result == true)
+    }
+
+    @Test("hasValidRemote returns true when upstream points to mozilla-mobile (fork scenario)")
+    func hasValidRemoteReturnsTrueForUpstreamRemote() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        // Simulate a fork: origin is user's fork, upstream is mozilla-mobile
+        try ShellRunner.run(
+            "git",
+            arguments: ["remote", "add", "origin", "git@github.com:someuser/firefox-ios.git"],
+            workingDirectory: repoDir
+        )
+        try ShellRunner.run(
+            "git",
+            arguments: ["remote", "add", "upstream", "git@github.com:mozilla-mobile/firefox-ios.git"],
+            workingDirectory: repoDir
+        )
+
+        let result = RepoDetector.hasValidRemote(repoRoot: repoDir)
+        #expect(result == true)
+    }
+
+    @Test("hasValidRemote returns false when no remote matches mozilla-mobile")
+    func hasValidRemoteReturnsFalseForUnrelatedRemote() throws {
+        let repoDir = try createTempGitRepo()
+        defer { cleanup(repoDir) }
+
+        try ShellRunner.run(
+            "git",
+            arguments: ["remote", "add", "origin", "git@github.com:someuser/some-other-repo.git"],
+            workingDirectory: repoDir
+        )
+
+        let result = RepoDetector.hasValidRemote(repoRoot: repoDir)
+        #expect(result == false)
+    }
 }
 
 @Suite("MergedConfig Tests")
