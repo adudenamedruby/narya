@@ -4,6 +4,8 @@ A CLI tool for managing tasks in the [firefox-ios](https://github.com/mozilla-mo
 
 Named after Narya, the Ring of Fire, and one of the three Rings of the Elves, forged by Celebrimbor of the Gwaith-i-Mírdain, and later borne by Gandalf.
 
+**NOTE:** This tool is still in **BETA**
+
 ## Goals
 
 The goals of this tool are simple:
