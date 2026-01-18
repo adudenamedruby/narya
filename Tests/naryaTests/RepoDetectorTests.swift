@@ -8,38 +8,18 @@ import Testing
 
 @Suite("RepoDetector Tests", .serialized)
 struct RepoDetectorTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
-        let tempDir = try createTempDirectory()
-        // Initialize a git repository
-        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
-        return tempDir
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
-    }
-
     @Test("findGitRoot returns repo root from subdirectory")
     func findGitRootFromSubdir() throws {
         let repoDir = try createTempGitRepo()
         defer { cleanup(repoDir) }
 
         let subDir = repoDir.appendingPathComponent("some/nested/path")
-        try fileManager.createDirectory(at: subDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: subDir, withIntermediateDirectories: true)
 
         // Save and change directory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(subDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(subDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         let found = RepoDetector.findGitRoot()
         #expect(found != nil)
@@ -52,9 +32,9 @@ struct RepoDetectorTests {
         defer { cleanup(tempDir) }
 
         // Save and change directory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         let found = RepoDetector.findGitRoot()
         #expect(found == nil)
@@ -123,9 +103,9 @@ struct RepoDetectorTests {
         try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
 
         // Save and change directory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         let repoInfo = try RepoDetector.requireValidRepo()
         #expect(repoInfo.config.project == "firefox-ios")
@@ -141,12 +121,12 @@ struct RepoDetectorTests {
         try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
 
         let subDir = repoDir.appendingPathComponent("deeply/nested/folder")
-        try fileManager.createDirectory(at: subDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: subDir, withIntermediateDirectories: true)
 
         // Save and change directory to subdirectory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(subDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(subDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         let repoInfo = try RepoDetector.requireValidRepo()
         #expect(repoInfo.config.project == "firefox-ios")
@@ -162,9 +142,9 @@ struct RepoDetectorTests {
         try "project: some-other-project".write(to: markerPath, atomically: true, encoding: .utf8)
 
         // Save and change directory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         #expect(throws: RepoDetectorError.self) {
             _ = try RepoDetector.requireValidRepo()
@@ -177,9 +157,9 @@ struct RepoDetectorTests {
         defer { cleanup(repoDir) }
 
         // Save and change directory (no marker file created)
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         #expect(throws: RepoDetectorError.self) {
             _ = try RepoDetector.requireValidRepo()
@@ -192,9 +172,9 @@ struct RepoDetectorTests {
         defer { cleanup(tempDir) }
 
         // Save and change directory
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         #expect(throws: RepoDetectorError.self) {
             _ = try RepoDetector.requireValidRepo()

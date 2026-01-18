@@ -9,25 +9,6 @@ import Testing
 
 @Suite("Build Tests", .serialized)
 struct BuildTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
-        let tempDir = try createTempDirectory()
-        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
-        return tempDir
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
-    }
-
     // MARK: - Command Configuration Tests
 
     @Test("Command has correct name")
@@ -227,9 +208,9 @@ struct BuildTests {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Build.parse([])
         #expect(throws: RepoDetectorError.self) {
@@ -242,9 +223,9 @@ struct BuildTests {
         let repoDir = try createTempGitRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Build.parse([])
         #expect(throws: RepoDetectorError.self) {

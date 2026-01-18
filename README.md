@@ -13,7 +13,7 @@ The goals of this tool are simple:
 3. Provide a thoroughly documented, understandable experience that will reduce tribal knowledge
 4. Provide a simple, indirect way for new developers to discover tooling used in Swift development
 
-Bonus/most important goal: be dope by being ridiculouly helpful
+Bonus/most important goal: be dope by being ridiculously helpful
 
 If a command doesn't materially achieve one of these goals & the bonus goal, it likely shouldn't be part of `narya`
 
@@ -40,7 +40,7 @@ brew install narya
 
 ## Configuration
 
-`narya` uses a `.narya.yaml` file in the repository root for configuration and validation that it's in the correct repository.
+`narya` uses a `.narya.yaml` file in the firefox-ios repository root for configuration and validation that it's in the correct repository.
 
 For the complete configuration reference, see [CONFIGURATION.md](CONFIGURATION.md).
 
@@ -50,16 +50,6 @@ A minimal `.narya.yaml` only needs the required `project` field:
 
 ```yaml
 project: firefox-ios
-```
-
-This uses bundled defaults (`firefox`) for bootstrap and build commands.
-
-### Configuration with Overrides
-
-```yaml
-project: firefox-ios
-default_bootstrap: focus
-default_build_product: focus
 ```
 
 ## Architecture
@@ -100,14 +90,14 @@ swift run narya
 
 ### Testing Notes
 
-Tests use Swift Testing framework (`@Test`, `@Suite`, `#expect`).
+Tests use the modern Swift Testing framework (`@Test`, `@Suite`, `#expect`).
+
+⚠️ **IMPORTANT:** Tests must be run with the `--no-parallel` flag to avoid concurrency issues. Many tests change the current working directory, which is global process state. Running tests in parallel _will_ cause cross-contamination between test suites.
 
 ```bash
 # Run all tests (must use --no-parallel)
 swift test --no-parallel
 ```
-
-⚠️ **IMPORTANT:** Tests must be run with the `--no-parallel` flag to avoid concurrency issues. Many tests change the current working directory, which is global process state. Running tests in parallel _will_ cause cross-contamination between test suites.
 
 Any new feature or command must include corresponding tests. Tests should cover:
 
@@ -184,6 +174,10 @@ Herald.declare("Warning: deprecated API usage\nin file Foo.swift:42", asError: t
 Herald.declare("Compiling module C")
 Herald.declare("Build complete!", asConclusion: true)
 ```
+
+#### Raw output
+
+The `Herald` also has a `raw()` function if you need to print out any text. This should almost exclusively be used for the `--expose` command.
 
 ### Error Handling
 

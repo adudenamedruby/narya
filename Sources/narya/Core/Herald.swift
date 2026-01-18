@@ -68,4 +68,10 @@ enum Herald {
             hadConclusion = true
         }
     }
+
+    /// Outputs raw text without Herald formatting.
+    /// Use for command output in --expose mode where users need copy-pasteable commands.
+    static func raw(_ message: String) {
+        Swift.print(message)
+    }
 }

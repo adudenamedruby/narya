@@ -118,17 +118,17 @@ extension Lint {
 
         private func printExposedCommands(lintAll: Bool, repoRoot: URL) {
             if lintAll {
-                print("# Lint entire codebase")
-                print("swiftlint")
+                Herald.raw("# Lint entire codebase")
+                Herald.raw("swiftlint")
             } else {
                 let configPath = repoRoot.appendingPathComponent(".swiftlint.yaml").path
 
-                print("# Get merge base")
-                print("BASE=$(git merge-base HEAD main)")
-                print("")
-                print("# Find changed Swift files")
-                print(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
-                print("")
+                Herald.raw("# Get merge base")
+                Herald.raw("BASE=$(git merge-base HEAD main)")
+                Herald.raw("")
+                Herald.raw("# Find changed Swift files")
+                Herald.raw(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
+                Herald.raw("")
 
                 var args: [String] = ["lint", "--config", configPath, "--path", "<file>"]
 
@@ -140,8 +140,8 @@ extension Lint {
                     args.append("--quiet")
                 }
 
-                print("# Lint each changed file")
-                print(CommandHelpers.formatCommand("swiftlint", arguments: args))
+                Herald.raw("# Lint each changed file")
+                Herald.raw(CommandHelpers.formatCommand("swiftlint", arguments: args))
             }
         }
     }

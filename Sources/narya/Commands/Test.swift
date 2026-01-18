@@ -233,9 +233,9 @@ struct Test: ParsableCommand {
             )
             buildArgs.append("build-for-testing")
 
-            print("# Build for testing")
-            print(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
-            print("")
+            Herald.raw("# Build for testing")
+            Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
+            Herald.raw("")
         }
 
         // Print test command
@@ -265,8 +265,8 @@ struct Test: ParsableCommand {
 
         testArgs.append("test")
 
-        print("# Run \(plan.displayName)")
-        print(CommandHelpers.formatCommand("xcodebuild", arguments: testArgs))
+        Herald.raw("# Run \(plan.displayName)")
+        Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: testArgs))
     }
 
 }

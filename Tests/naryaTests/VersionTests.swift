@@ -9,16 +9,7 @@ import Testing
 
 @Suite("Version Tests", .serialized)
 struct VersionTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
+    func createVersionTestGitRepo() throws -> URL {
         let tempDir = try createTempDirectory()
         try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
         // Create an initial commit so git rev-parse works
@@ -27,14 +18,10 @@ struct VersionTests {
     }
 
     func createValidRepo() throws -> URL {
-        let repoDir = try createTempGitRepo()
+        let repoDir = try createVersionTestGitRepo()
         let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
         try "project: firefox-ios".write(to: markerPath, atomically: true, encoding: .utf8)
         return repoDir
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
     }
 
     // MARK: - Command Configuration Tests
@@ -62,9 +49,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse([])
         // Should not throw - just prints version
@@ -76,9 +63,9 @@ struct VersionTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse([])
 
@@ -97,9 +84,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.0".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "major", "--verify"])
 
@@ -118,9 +105,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "major"])
         try command.run()
@@ -138,9 +125,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "minor"])
         try command.run()
@@ -158,9 +145,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "146.0".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "major"])
         try command.run()
@@ -175,9 +162,9 @@ struct VersionTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "major"])
 
@@ -196,9 +183,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--set", "150.0"])
         try command.run()
@@ -216,9 +203,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--set", "145.6"])
         try command.run()
@@ -236,9 +223,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--set", "invalid"])
 
@@ -255,9 +242,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--set", "1.2.3"])
 
@@ -279,7 +266,7 @@ struct VersionTests {
 
         // Create consistent plist
         let clientDir = repoDir.appendingPathComponent("firefox-ios/Client")
-        try fileManager.createDirectory(at: clientDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: clientDir, withIntermediateDirectories: true)
         let plistContent = """
             <plist>
             <dict>
@@ -290,9 +277,9 @@ struct VersionTests {
             """
         try plistContent.write(to: clientDir.appendingPathComponent("Info.plist"), atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--verify"])
         // Should not throw when consistent
@@ -304,9 +291,9 @@ struct VersionTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--verify"])
 
@@ -325,9 +312,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "invalid".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "major"])
 
@@ -344,9 +331,9 @@ struct VersionTests {
         let versionFile = repoDir.appendingPathComponent("version.txt")
         try "1.2.3".write(to: versionFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.parse(["--bump", "minor"])
 

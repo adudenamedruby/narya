@@ -9,21 +9,6 @@ import Testing
 
 @Suite("Telemetry Tests", .serialized)
 struct TelemetryTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
-        let tempDir = try createTempDirectory()
-        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
-        return tempDir
-    }
-
     func createValidRepo() throws -> URL {
         let repoDir = try createTempGitRepo()
         let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
@@ -35,7 +20,7 @@ struct TelemetryTests {
         // Create the Glean directory structure
         let gleanDir = repoDir.appendingPathComponent("firefox-ios/Client/Glean")
         let probesDir = gleanDir.appendingPathComponent("probes")
-        try fileManager.createDirectory(at: probesDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: probesDir, withIntermediateDirectories: true)
 
         // Create glean_index.yaml
         let indexContent = """
@@ -60,13 +45,9 @@ struct TelemetryTests {
 
         // Create Storage directory with metrics.yaml
         let storageDir = repoDir.appendingPathComponent("firefox-ios/Storage")
-        try fileManager.createDirectory(at: storageDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: storageDir, withIntermediateDirectories: true)
         let storageMetrics = storageDir.appendingPathComponent("metrics.yaml")
         try "# Storage metrics".write(to: storageMetrics, atomically: true, encoding: .utf8)
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
     }
 
     // MARK: - Command Configuration Tests
@@ -97,9 +78,9 @@ struct TelemetryTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--refresh", "--add", "someFeature"])
 
@@ -113,9 +94,9 @@ struct TelemetryTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "some_feature"])
 
@@ -129,9 +110,9 @@ struct TelemetryTests {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "some-feature"])
 
@@ -153,9 +134,9 @@ struct TelemetryTests {
         let probeFile = probesDir.appendingPathComponent("test_feature.yaml")
         try "# Test probe".write(to: probeFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--refresh"])
         try command.run()
@@ -174,16 +155,16 @@ struct TelemetryTests {
         defer { cleanup(repoDir) }
         try setupTelemetryStructure(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "newFeature"])
         try command.run()
 
         // Verify file was created with snake_case name
         let newFile = repoDir.appendingPathComponent("firefox-ios/Client/Glean/probes/new_feature.yaml")
-        #expect(fileManager.fileExists(atPath: newFile.path))
+        #expect(FileManager.default.fileExists(atPath: newFile.path))
     }
 
     @Test("add command creates file with correct template")
@@ -192,9 +173,9 @@ struct TelemetryTests {
         defer { cleanup(repoDir) }
         try setupTelemetryStructure(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "testFeature"])
         try command.run()
@@ -213,9 +194,9 @@ struct TelemetryTests {
         defer { cleanup(repoDir) }
         try setupTelemetryStructure(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "newFeature"])
         try command.run()
@@ -231,9 +212,9 @@ struct TelemetryTests {
         defer { cleanup(repoDir) }
         try setupTelemetryStructure(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "customFeature", "--description", "My custom description"])
         try command.run()
@@ -251,14 +232,14 @@ struct TelemetryTests {
         defer { cleanup(repoDir) }
         try setupTelemetryStructure(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Telemetry.parse(["--add", "myNewAwesomeFeature"])
         try command.run()
 
         let newFile = repoDir.appendingPathComponent("firefox-ios/Client/Glean/probes/my_new_awesome_feature.yaml")
-        #expect(fileManager.fileExists(atPath: newFile.path))
+        #expect(FileManager.default.fileExists(atPath: newFile.path))
     }
 }

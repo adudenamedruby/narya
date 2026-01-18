@@ -230,9 +230,9 @@ struct Build: ParsableCommand {
                 "-onlyUsePackageVersionsFromResolvedFile",
                 "-project", projectPath.path
             ]
-            print("# Resolve Swift Package dependencies")
-            print(CommandHelpers.formatCommand("xcodebuild", arguments: resolveArgs))
-            print("")
+            Herald.raw("# Resolve Swift Package dependencies")
+            Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: resolveArgs))
+            Herald.raw("")
         }
 
         // Print build command
@@ -243,7 +243,7 @@ struct Build: ParsableCommand {
         )
         buildArgs.append(forTesting ? "build-for-testing" : "build")
 
-        print("# Build \(product.scheme)")
-        print(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
+        Herald.raw("# Build \(product.scheme)")
+        Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
     }
 }

@@ -9,25 +9,6 @@ import Testing
 
 @Suite("Test Command Tests", .serialized)
 struct TestCommandTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
-        let tempDir = try createTempDirectory()
-        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
-        return tempDir
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
-    }
-
     // MARK: - Command Configuration Tests
 
     @Test("Command has correct name")
@@ -298,9 +279,9 @@ struct TestCommandTests {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Test.parse([])
         #expect(throws: RepoDetectorError.self) {
@@ -313,9 +294,9 @@ struct TestCommandTests {
         let repoDir = try createTempGitRepo()
         defer { cleanup(repoDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Test.parse([])
         #expect(throws: RepoDetectorError.self) {

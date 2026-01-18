@@ -9,19 +9,6 @@ import Testing
 
 @Suite("Clean Tests", .serialized)
 struct CleanTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
-    }
-
     @Test("Command has correct name")
     func commandHasCorrectName() {
         #expect(Clean.configuration.commandName == "clean")
@@ -39,11 +26,11 @@ struct CleanTests {
         defer { cleanup(tempDir) }
 
         // Save current directory
-        let originalDir = fileManager.currentDirectoryPath
+        let originalDir = FileManager.default.currentDirectoryPath
 
         // Change to temp directory without marker file
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Clean.parse(["--packages"])
         #expect(throws: RepoDetectorError.self) {

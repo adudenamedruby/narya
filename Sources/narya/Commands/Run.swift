@@ -258,9 +258,9 @@ struct Run: ParsableCommand {
                 "-onlyUsePackageVersionsFromResolvedFile",
                 "-project", projectPath.path
             ]
-            print("# Resolve Swift Package dependencies")
-            print(CommandHelpers.formatCommand("xcodebuild", arguments: resolveArgs))
-            print("")
+            Herald.raw("# Resolve Swift Package dependencies")
+            Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: resolveArgs))
+            Herald.raw("")
         }
 
         // Print build command
@@ -274,27 +274,27 @@ struct Run: ParsableCommand {
         )
         buildArgs.append("build")
 
-        print("# Build \(product.scheme)")
-        print(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
-        print("")
+        Herald.raw("# Build \(product.scheme)")
+        Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: buildArgs))
+        Herald.raw("")
 
         // Print simctl commands
-        print("# Boot simulator")
-        print("xcrun simctl boot '\(simulator.simulator.udid)'")
-        print("")
+        Herald.raw("# Boot simulator")
+        Herald.raw("xcrun simctl boot '\(simulator.simulator.udid)'")
+        Herald.raw("")
 
-        print("# Open Simulator.app")
-        print("open -a Simulator")
-        print("")
+        Herald.raw("# Open Simulator.app")
+        Herald.raw("open -a Simulator")
+        Herald.raw("")
 
         // Note: We can't know the exact app path without building
         let appPathExample = "~/Library/Developer/Xcode/DerivedData/.../Build/Products/\(config)-iphonesimulator/\(product.scheme).app"
 
-        print("# Install app (path determined after build)")
-        print("xcrun simctl install '\(simulator.simulator.udid)' '\(appPathExample)'")
-        print("")
+        Herald.raw("# Install app (path determined after build)")
+        Herald.raw("xcrun simctl install '\(simulator.simulator.udid)' '\(appPathExample)'")
+        Herald.raw("")
 
-        print("# Launch app")
-        print("xcrun simctl launch '\(simulator.simulator.udid)' '\(product.bundleIdentifier)'")
+        Herald.raw("# Launch app")
+        Herald.raw("xcrun simctl launch '\(simulator.simulator.udid)' '\(product.bundleIdentifier)'")
     }
 }

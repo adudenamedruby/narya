@@ -101,25 +101,25 @@ struct Clean: ParsableCommand {
 
         if build || all {
             let buildDir = repoRoot.appendingPathComponent(".build")
-            print("# Remove .build directory")
-            print(CommandHelpers.formatCommand("rm", arguments: ["-rf", buildDir.path]))
-            print("")
+            Herald.raw("# Remove .build directory")
+            Herald.raw(CommandHelpers.formatCommand("rm", arguments: ["-rf", buildDir.path]))
+            Herald.raw("")
         }
 
         if derivedData || all {
             let derivedDataDir = fileManager.homeDirectoryForCurrentUser
                 .appendingPathComponent("Library/Developer/Xcode/DerivedData")
-            print("# Remove DerivedData directory")
-            print(CommandHelpers.formatCommand("rm", arguments: ["-rf", derivedDataDir.path]))
-            print("")
+            Herald.raw("# Remove DerivedData directory")
+            Herald.raw(CommandHelpers.formatCommand("rm", arguments: ["-rf", derivedDataDir.path]))
+            Herald.raw("")
         }
 
         if packages || all {
-            print("# Reset Swift packages")
-            print(CommandHelpers.formatCommand("swift", arguments: ["package", "reset"]))
-            print("")
-            print("# Resolve Swift packages")
-            print(CommandHelpers.formatCommand("swift", arguments: ["package", "resolve"]))
+            Herald.raw("# Reset Swift packages")
+            Herald.raw(CommandHelpers.formatCommand("swift", arguments: ["package", "reset"]))
+            Herald.raw("")
+            Herald.raw("# Resolve Swift packages")
+            Herald.raw(CommandHelpers.formatCommand("swift", arguments: ["package", "resolve"]))
         }
     }
 }

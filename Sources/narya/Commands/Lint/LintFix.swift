@@ -96,22 +96,22 @@ extension Lint {
 
         private func printExposedCommands(fixAll: Bool, repoRoot: URL) {
             if fixAll {
-                print("# Fix entire codebase")
-                print("swiftlint --fix")
+                Herald.raw("# Fix entire codebase")
+                Herald.raw("swiftlint --fix")
             } else {
                 let configPath = repoRoot.appendingPathComponent(".swiftlint.yaml").path
 
-                print("# Get merge base")
-                print("BASE=$(git merge-base HEAD main)")
-                print("")
-                print("# Find changed Swift files")
-                print(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
-                print("")
+                Herald.raw("# Get merge base")
+                Herald.raw("BASE=$(git merge-base HEAD main)")
+                Herald.raw("")
+                Herald.raw("# Find changed Swift files")
+                Herald.raw(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
+                Herald.raw("")
 
                 let args: [String] = ["lint", "--fix", "--config", configPath, "--path", "<file>"]
 
-                print("# Fix each changed file")
-                print(CommandHelpers.formatCommand("swiftlint", arguments: args))
+                Herald.raw("# Fix each changed file")
+                Herald.raw(CommandHelpers.formatCommand("swiftlint", arguments: args))
             }
         }
     }

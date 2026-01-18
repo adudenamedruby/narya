@@ -9,21 +9,6 @@ import Testing
 
 @Suite("Nimbus Tests", .serialized)
 struct NimbusTests {
-    let fileManager = FileManager.default
-
-    func createTempDirectory() throws -> URL {
-        let tempDir = fileManager.temporaryDirectory
-            .appendingPathComponent(UUID().uuidString)
-        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        return tempDir
-    }
-
-    func createTempGitRepo() throws -> URL {
-        let tempDir = try createTempDirectory()
-        try ShellRunner.run("git", arguments: ["init"], workingDirectory: tempDir)
-        return tempDir
-    }
-
     func createValidRepo() throws -> URL {
         let repoDir = try createTempGitRepo()
         let markerPath = repoDir.appendingPathComponent(Configuration.markerFileName)
@@ -35,7 +20,7 @@ struct NimbusTests {
         // Create the firefox-ios directory structure
         let firefoxDir = repoDir.appendingPathComponent("firefox-ios")
         let nimbusDir = firefoxDir.appendingPathComponent("nimbus-features")
-        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
 
         // Create nimbus.fml.yaml
         let fmlContent = """
@@ -55,9 +40,9 @@ struct NimbusTests {
         let nimbusDir = clientDir.appendingPathComponent("Nimbus")
         let debugDir = clientDir.appendingPathComponent("Frontend/Settings/Main/Debug/FeatureFlags")
 
-        try fileManager.createDirectory(at: featureFlagsDir, withIntermediateDirectories: true)
-        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
-        try fileManager.createDirectory(at: debugDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: featureFlagsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: debugDir, withIntermediateDirectories: true)
 
         // Create NimbusFlaggableFeature.swift
         let flaggableFeatureContent = """
@@ -154,10 +139,6 @@ struct NimbusTests {
         try debugVCContent.write(to: debugVCPath, atomically: true, encoding: .utf8)
     }
 
-    func cleanup(_ url: URL) {
-        try? fileManager.removeItem(at: url)
-    }
-
     // MARK: - Command Configuration Tests
 
     @Test("Command has non-empty abstract")
@@ -185,9 +166,9 @@ struct NimbusTests {
         let tempDir = try createTempDirectory()
         defer { cleanup(tempDir) }
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(tempDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(tempDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Refresh.parse([])
 
@@ -207,9 +188,9 @@ struct NimbusTests {
         let featureFile = featuresDir.appendingPathComponent("testFeature.yaml")
         try "# Test feature".write(to: featureFile, atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Refresh.parse([])
         try command.run()
@@ -232,9 +213,9 @@ struct NimbusTests {
         try "# Feature A".write(to: featuresDir.appendingPathComponent("aFeature.yaml"), atomically: true, encoding: .utf8)
         try "# Feature B".write(to: featuresDir.appendingPathComponent("bFeature.yaml"), atomically: true, encoding: .utf8)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Refresh.parse([])
         try command.run()
@@ -255,11 +236,11 @@ struct NimbusTests {
 
         // Create nimbus-features dir but not the FML file
         let nimbusDir = repoDir.appendingPathComponent("firefox-ios/nimbus-features")
-        try fileManager.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: nimbusDir, withIntermediateDirectories: true)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Refresh.parse([])
 
@@ -277,16 +258,16 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["myTest"])
         try command.run()
 
         // Verify file was created with "Feature" suffix appended
         let newFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myTestFeature.yaml")
-        #expect(fileManager.fileExists(atPath: newFile.path))
+        #expect(FileManager.default.fileExists(atPath: newFile.path))
     }
 
     @Test("add command appends Feature if not present")
@@ -296,15 +277,15 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["myTest"])
         try command.run()
 
         let newFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myTestFeature.yaml")
-        #expect(fileManager.fileExists(atPath: newFile.path))
+        #expect(FileManager.default.fileExists(atPath: newFile.path))
     }
 
     @Test("add command does not double-append Feature")
@@ -314,9 +295,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["myTestFeature"])
         try command.run()
@@ -324,8 +305,8 @@ struct NimbusTests {
         // Should be myTestFeature.yaml, not myTestFeatureFeature.yaml
         let correctFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myTestFeature.yaml")
         let wrongFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/myTestFeatureFeature.yaml")
-        #expect(fileManager.fileExists(atPath: correctFile.path))
-        #expect(!fileManager.fileExists(atPath: wrongFile.path))
+        #expect(FileManager.default.fileExists(atPath: correctFile.path))
+        #expect(!FileManager.default.fileExists(atPath: wrongFile.path))
     }
 
     @Test("add command creates file with correct template")
@@ -335,9 +316,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["test"])
         try command.run()
@@ -359,9 +340,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["myAwesomeTest"])
         try command.run()
@@ -380,9 +361,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["new"])
         try command.run()
@@ -400,9 +381,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["beta"])
         try command.run()
@@ -423,9 +404,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["beta"])
         try command.run()
@@ -448,9 +429,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["beta", "--debug"])
         try command.run()
@@ -474,9 +455,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Add.parse(["beta", "--user-toggleable"])
         try command.run()
@@ -497,22 +478,22 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         // First add a feature
         var addCommand = try Nimbus.Add.parse(["beta"])
         try addCommand.run()
 
         let featureFile = repoDir.appendingPathComponent("firefox-ios/nimbus-features/betaFeature.yaml")
-        #expect(fileManager.fileExists(atPath: featureFile.path))
+        #expect(FileManager.default.fileExists(atPath: featureFile.path))
 
         // Now remove it
         var removeCommand = try Nimbus.Remove.parse(["beta"])
         try removeCommand.run()
 
-        #expect(!fileManager.fileExists(atPath: featureFile.path))
+        #expect(!FileManager.default.fileExists(atPath: featureFile.path))
     }
 
     @Test("remove command removes from all Swift files")
@@ -522,9 +503,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         // First add a feature with --debug
         var addCommand = try Nimbus.Add.parse(["beta", "--debug"])
@@ -562,9 +543,9 @@ struct NimbusTests {
         try setupNimbusStructure(in: repoDir)
         try setupSwiftFiles(in: repoDir)
 
-        let originalDir = fileManager.currentDirectoryPath
-        fileManager.changeCurrentDirectoryPath(repoDir.path)
-        defer { fileManager.changeCurrentDirectoryPath(originalDir) }
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Nimbus.Remove.parse(["nonexistent"])
 
