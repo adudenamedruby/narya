@@ -27,14 +27,12 @@ extension Nimbus {
         var userToggleable = false
 
         mutating func run() throws {
-            Herald.reset()
-
             let repo = try RepoDetector.requireValidRepo()
 
             // Standardize the feature name (remove Feature suffix if present)
             let cleanName = NimbusHelpers.cleanFeatureName(featureName)
 
-            Herald.declare("Adding feature '\(cleanName)'...")
+            Herald.declare("Adding feature '\(cleanName)'...", isNewCommand: true)
 
             // 1. Create the YAML file
             let yamlFileName = "\(cleanName)Feature.yaml"

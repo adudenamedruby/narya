@@ -16,7 +16,6 @@ struct ListSims: ParsableCommand {
     )
 
     func run() throws {
-        Herald.reset()
         try CommandHelpers.printSimulatorList()
     }
 }
@@ -48,7 +47,7 @@ enum CommandHelpers {
         let simulatorsByRuntime = try SimulatorManager.listSimulators()
 
         guard !simulatorsByRuntime.isEmpty else {
-            Herald.declare("No iOS simulators found. Please install simulators via Xcode.")
+            Herald.declare("No iOS simulators found. Please install simulators via Xcode.", isNewCommand: true)
             return
         }
 
@@ -102,7 +101,7 @@ enum CommandHelpers {
         maxShorthandWidth += 2
 
         // Print header
-        Herald.declare("Available Simulators:")
+        Herald.declare("Available Simulators:", isNewCommand: true)
         Herald.declare("")
 
         let headerLine = deviceHeader.padding(toLength: maxDeviceWidth, withPad: " ", startingAt: 0) +

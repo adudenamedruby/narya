@@ -12,11 +12,9 @@ extension Nimbus {
         )
 
         mutating func run() throws {
-            Herald.reset()
-
             let repo = try RepoDetector.requireValidRepo()
 
-            Herald.declare("Updating nimbus.fml.yaml include block...")
+            Herald.declare("Updating nimbus.fml.yaml include block...", isNewCommand: true)
             try NimbusHelpers.updateNimbusFml(repoRoot: repo.root)
             Herald.declare("Successfully updated nimbus.fml.yaml", asConclusion: true)
         }

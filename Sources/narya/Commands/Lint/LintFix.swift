@@ -26,8 +26,6 @@ extension Lint {
         // MARK: - Run
 
         mutating func run() throws {
-            Herald.reset()
-
             let repo = try RepoDetector.requireValidRepo()
             try LintHelpers.requireSwiftlint()
 
@@ -46,7 +44,7 @@ extension Lint {
 
         private func runFix(fixAll: Bool, repoRoot: URL) throws {
             if fixAll {
-                Herald.declare("Fixing entire codebase...")
+                Herald.declare("Fixing entire codebase...", isNewCommand: true)
 
                 do {
                     try ShellRunner.run("swiftlint", arguments: ["--fix"], workingDirectory: repoRoot)
@@ -59,7 +57,7 @@ extension Lint {
                     }
                 }
             } else {
-                Herald.declare("Fixing changed files...")
+                Herald.declare("Fixing changed files...", isNewCommand: true)
                 let changedFiles = try LintHelpers.getChangedSwiftFiles(repoRoot: repoRoot)
 
                 if changedFiles.isEmpty {

@@ -33,8 +33,6 @@ struct Clean: ParsableCommand {
             return
         }
 
-        Herald.reset()
-
         // Validate we're in a firefox-ios repository and get repo root
         let repo = try RepoDetector.requireValidRepo()
 
@@ -62,11 +60,11 @@ struct Clean: ParsableCommand {
         let fileManager = FileManager.default
 
         guard fileManager.fileExists(atPath: buildDir.path) else {
-            Herald.declare("No .build directory found, nothing to clean.")
+            Herald.declare("No .build directory found, nothing to clean.", isNewCommand: true)
             return
         }
 
-        Herald.declare("Removing .build directory...")
+        Herald.declare("Removing .build directory...", isNewCommand: true)
         try fileManager.removeItem(at: buildDir)
         Herald.declare("Build directory cleaned!")
     }
@@ -77,17 +75,17 @@ struct Clean: ParsableCommand {
             .appendingPathComponent("Library/Developer/Xcode/DerivedData")
 
         guard fileManager.fileExists(atPath: derivedDataDir.path) else {
-            Herald.declare("No DerivedData directory found, nothing to clean.")
+            Herald.declare("No DerivedData directory found, nothing to clean.", isNewCommand: true)
             return
         }
 
-        Herald.declare("Removing DerivedData directory...")
+        Herald.declare("Removing DerivedData directory...", isNewCommand: true)
         try fileManager.removeItem(at: derivedDataDir)
         Herald.declare("DerivedData cleaned!")
     }
 
     private func cleanPackages(repoRoot: URL) throws {
-        Herald.declare("Resetting Swift packages...")
+        Herald.declare("Resetting Swift packages...", isNewCommand: true)
         try ShellRunner.run("swift", arguments: ["package", "reset"], workingDirectory: repoRoot)
 
         Herald.declare("Resolving Swift packages...")

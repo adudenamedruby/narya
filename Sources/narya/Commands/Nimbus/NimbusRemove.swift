@@ -21,14 +21,12 @@ extension Nimbus {
         var featureName: String
 
         mutating func run() throws {
-            Herald.reset()
-
             let repo = try RepoDetector.requireValidRepo()
 
             // Standardize the feature name
             let cleanName = NimbusHelpers.cleanFeatureName(featureName)
 
-            Herald.declare("Removing feature '\(cleanName)'...")
+            Herald.declare("Removing feature '\(cleanName)'...", isNewCommand: true)
             Herald.declare("")
 
             // Collect all file paths

@@ -89,8 +89,6 @@ struct Build: ParsableCommand {
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
 
-        Herald.reset()
-
         // Check for required tools
         try ToolChecker.requireXcodebuild()
 
@@ -140,7 +138,7 @@ struct Build: ParsableCommand {
             simulator: simulatorSelection
         )
 
-        Herald.declare("Build succeeded!", asConclusion: true)
+        Herald.declare("Build succeeded!", isNewCommand: quiet, asConclusion: true)
     }
 
     // MARK: - Private Methods
@@ -148,7 +146,7 @@ struct Build: ParsableCommand {
     private func printBuildInfo(product: BuildProduct, simulator: SimulatorSelection?, repoRoot: URL) {
         if quiet { return }
 
-        Herald.declare("Build Configuration:")
+        Herald.declare("Build Configuration:", isNewCommand: true)
         Herald.declare("  Product: \(product.scheme)")
         Herald.declare("  Project: \(product.projectPath)")
 

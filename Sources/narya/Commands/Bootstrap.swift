@@ -40,8 +40,6 @@ struct Bootstrap: ParsableCommand {
     var force = false
 
     mutating func run() throws {
-        Herald.reset()
-
         // Validate we're in a firefox-ios repository and get repo root
         let repo = try RepoDetector.requireValidRepo()
 
@@ -72,7 +70,7 @@ struct Bootstrap: ParsableCommand {
     }
 
     private func bootstrapFirefox(repoRoot: URL) throws {
-        Herald.declare("Running Firefox bootstrap...")
+        Herald.declare("Running Firefox bootstrap...", isNewCommand: true)
 
         let fileManager = FileManager.default
 
@@ -113,7 +111,7 @@ struct Bootstrap: ParsableCommand {
     }
 
     private func bootstrapFocus(repoRoot: URL) throws {
-        Herald.declare("Running Focus bootstrap...")
+        Herald.declare("Running Focus bootstrap...", isNewCommand: true)
 
         let fileManager = FileManager.default
         let focusDir = repoRoot.appendingPathComponent("focus-ios")

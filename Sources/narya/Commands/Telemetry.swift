@@ -44,8 +44,6 @@ struct Telemetry: ParsableCommand {
             throw ValidationError("Cannot specify both --refresh and --add. Choose one.")
         }
 
-        Herald.reset()
-
         let repo = try RepoDetector.requireValidRepo()
 
         if refresh {
@@ -58,7 +56,7 @@ struct Telemetry: ParsableCommand {
     // MARK: - Refresh Command
 
     private func runRefresh(repoRoot: URL) throws {
-        Herald.declare("Updating telemetry index files...")
+        Herald.declare("Updating telemetry index files...", isNewCommand: true)
 
         try updateIndexFile(repoRoot: repoRoot)
         Herald.declare("Successfully updated the glean index file.")
@@ -81,7 +79,7 @@ struct Telemetry: ParsableCommand {
         let newFileURL = repoRoot.appendingPathComponent(newFilePath)
 
         // Create the new metrics YAML file
-        Herald.declare("Creating metrics file for \(featureName)...")
+        Herald.declare("Creating metrics file for \(featureName)...", isNewCommand: true)
         try writeMetricsTemplate(to: newFileURL, tagName: capitalizedTag)
         Herald.declare("Successfully added file: \(newFilePath)")
 

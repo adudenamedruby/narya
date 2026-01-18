@@ -17,8 +17,6 @@ struct Setup: ParsableCommand {
     var location: String?
 
     mutating func run() throws {
-        Herald.reset()
-
         try ToolChecker.requireGit()
         try ToolChecker.requireNode()
         try ToolChecker.requireNpm()
@@ -40,7 +38,7 @@ struct Setup: ParsableCommand {
             arguments.append(location)
         }
 
-        Herald.declare("Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.")
+        Herald.declare("Cloning firefox-ios. This may take a while. Grab a coffee. Go pet a fox.", isNewCommand: true)
         try ShellRunner.run("git", arguments: arguments)
         Herald.declare("Cloning done.")
 

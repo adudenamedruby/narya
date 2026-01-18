@@ -7,54 +7,65 @@ import Foundation
 /// Handles formatted output for narya commands.
 /// The first line of output uses 💍, subsequent lines use ▒
 enum Herald {
-    // This is a CLI tool that runs single-threaded, so mutable global state is safe
-    nonisolated(unsafe) private static var isFirstLine = true
+    private static let indentChar = "▒"
 
-    /// Resets the output state for a new command execution
-    static func reset() {
-        isFirstLine = true
-    }
+    // State tracking: after a conclusion, subsequent calls use normal continuation
+    nonisolated(unsafe) private static var hadConclusion = false
 
     /// Declares a message with formatted prefix based on context.
     ///
     /// Output prefixes:
-    /// - First line: `💍` (or `💍 💥` if asError)
-    /// - Subsequent lines: `▒` (or `▒ 💥` if asError)
-    /// - Conclusion lines: `💍` (or `💍 💥` if asError)
+    /// - `isNewCommand: true`: `💍` (or `💍 💥` if asError)
+    /// - Normal continuation: `▒` (or `▒ 💥` if asError)
+    /// - First conclusion: `💍` (or `💍 💥` if asError)
+    /// - Post-conclusion: `▒` (asError and asConclusion ignored)
     ///
-    /// Multi-line messages use `▒ ▒ ` prefix for lines after the first.
+    /// Multi-line messages use `▒ ▒` prefix for lines after the first.
     ///
     /// - Parameters:
     ///   - message: The message to display
     ///   - asError: If true, adds 💥 to indicate an error/warning
-    ///   - asConclusion: If true, uses 💍 prefix regardless of position (visual only, doesn't reset state)
+    ///   - isNewCommand: If true, resets state and uses 💍 prefix
+    ///   - asConclusion: If true, uses 💍 prefix (first time only)
     static func declare(
         _ message: String,
         asError: Bool = false,
+        isNewCommand: Bool = false,
         asConclusion: Bool = false
     ) {
+        // Reset state if new command
+        if isNewCommand {
+            hadConclusion = false
+        }
+
         let lines = message.components(separatedBy: .newlines)
 
         for (index, line) in lines.enumerated() {
             let prefix: String
+
             if index == 0 {
                 // First line of this message
-                let useRingPrefix = isFirstLine || asConclusion
-                if useRingPrefix {
+                if isNewCommand {
+                    prefix = asError ? "💍 💥" : "💍"
+                } else if hadConclusion {
+                    // After a conclusion, subsequent calls are normal continuation
+                    prefix = indentChar
+                } else if asConclusion {
                     prefix = asError ? "💍 💥" : "💍"
                 } else {
-                    prefix = asError ? "▒ 💥" : "▒"
+                    prefix = asError ? "\(indentChar) 💥" : indentChar
                 }
             } else {
-                // Subsequent lines of multi-line message
-                prefix = "▒ ▒"
+                // Subsequent lines of multi-line message use sub-continuation
+                prefix = "\(indentChar) \(indentChar)"
             }
 
             Swift.print("\(prefix) \(line)")
         }
 
-        // Only the first call sets isFirstLine to false
-        // asConclusion does NOT reset state
-        isFirstLine = false
+        // Update state after printing
+        if asConclusion && !hadConclusion {
+            hadConclusion = true
+        }
     }
 }

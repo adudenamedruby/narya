@@ -111,32 +111,69 @@ See existing test files in `Tests/naryaTests/` for examples.
 
 ### Outputting Status from `narya`
 
-All narya output is handled by the `Herald`. The maintain clarity between `narya`'s output and the output of tools/commands it wraps, we have a standard way of presenting output. The beginning of every action block from `narya` is preceeded by a 💍 and indented afterwards. To adhere to the preferred format, here's the results you can expect, from the singular interface of the herald
+All narya output is handled by the `Herald`. To maintain clarity between `narya`'s output and the output of tools/commands it wraps, we have a standard way of presenting output.
 
 ```swift
-      static func declare(
-          _ message: String,
-          asError: Bool = false,
-          asConclusion: Bool = false
-      )
-  }
+static func declare(
+    _ message: String,
+    asError: Bool = false,
+    isNewCommand: Bool = false,
+    asConclusion: Bool = false
+)
 ```
 
-Prefix Logic:
-| State | `asError` | `asConclusion` | Output Prefix | Comments |
-| ----------- | ----------- | ------------ | ------------ | -------- |
-| First line | false | false | 💍 | |
-| First line | true | false | 💍 💥 | |
-| First line | false | true | 💍 | `asConclusion` shouldn't be used when starting a report |
-| First line | true | true | 💍 💥 | `asConclusion` shouldn't be used when starting a report |
-| Mid-command | false | false | ▒ | |
-| Mid-command | true | false | ▒ 💥 | |
-| End of command | false | true | 💍 | |
-| End of command | true | true | 💍 💥 | |
-Multi-line handling:
+**Parameters:**
 
-- First line of message: uses computed prefix from above
-- Subsequent lines: always ▒ ▒ (sub-continuation)
+- `message` - The text to display
+- `asError` - Adds 💥 to indicate an error or warning
+- `isNewCommand` - Resets state and uses 💍 prefix (use at the start of each command)
+- `asConclusion` - Uses 💍 prefix for the final message of a command
+
+**Prefix Logic:**
+
+| Context              | `asError` | Output Prefix |
+| -------------------- | --------- | ------------- |
+| `isNewCommand: true` | false     | 💍            |
+| `isNewCommand: true` | true      | 💍 💥         |
+| Continuation         | false     | ▒             |
+| Continuation         | true      | ▒ 💥          |
+| `asConclusion: true` | false     | 💍            |
+| `asConclusion: true` | true      | 💍 💥         |
+| After conclusion     | (ignored) | ▒             |
+
+**Multi-line handling:**
+
+- First line of message: uses computed prefix from table above
+- Subsequent lines within the same message: always `▒ ▒` (sub-continuation)
+
+**State behavior:**
+
+- `isNewCommand: true` resets all state - use this at the start of each command's `run()` method
+- After a conclusion (`asConclusion: true`), subsequent calls use normal `▒` prefix and ignore `asError`/`asConclusion` flags
+- Sub-continuation (`▒ ▒`) only applies to lines 2+ within a single multi-line message, not across separate calls
+
+**Example output:**
+
+```
+💍 Starting build...
+▒ Compiling module A
+▒ Compiling module B
+▒ 💥 Warning: deprecated API usage
+▒ ▒ in file Foo.swift:42
+▒ Compiling module C
+💍 Build complete!
+```
+
+This is produced by:
+
+```swift
+Herald.declare("Starting build...", isNewCommand: true)
+Herald.declare("Compiling module A")
+Herald.declare("Compiling module B")
+Herald.declare("Warning: deprecated API usage\nin file Foo.swift:42", asError: true)
+Herald.declare("Compiling module C")
+Herald.declare("Build complete!", asConclusion: true)
+```
 
 ## Currently Supported Commands
 

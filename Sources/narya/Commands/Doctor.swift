@@ -12,9 +12,7 @@ struct Doctor: ParsableCommand {
     )
 
     mutating func run() throws {
-        Herald.reset()
-
-        Herald.declare("Checking development environment...")
+        Herald.declare("Checking development environment...", isNewCommand: true)
         print("")
 
         var issues: [String] = []

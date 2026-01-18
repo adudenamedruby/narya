@@ -51,7 +51,6 @@ extension L10n {
         var skipWidgetKit: Bool = false
 
         mutating func run() throws {
-            Herald.reset()
             try ToolChecker.requireXcodebuild()
 
             let locales: [String]
@@ -61,7 +60,7 @@ extension L10n {
                 locales = try L10nExportTask.discoverLocales(at: l10nProjectPath)
             }
 
-            Herald.declare("Importing \(locales.count) locale(s) into \(projectPath)...")
+            Herald.declare("Importing \(locales.count) locale(s) into \(projectPath)...", isNewCommand: true)
 
             try L10nImportTask(
                 xcodeProjPath: projectPath,

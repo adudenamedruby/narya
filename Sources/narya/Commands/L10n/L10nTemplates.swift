@@ -33,8 +33,7 @@ extension L10n {
         var xliffName: String = "firefox-ios.xliff"
 
         mutating func run() throws {
-            Herald.reset()
-            Herald.declare("Creating template XLIFF files...")
+            Herald.declare("Creating template XLIFF files...", isNewCommand: true)
 
             try L10nTemplatesTask(l10nRepoPath: l10nProjectPath, xliffName: xliffName).run()
 

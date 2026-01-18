@@ -13,11 +13,9 @@ extension Lint {
         )
 
         mutating func run() throws {
-            Herald.reset()
-
             try LintHelpers.requireSwiftlint()
 
-            Herald.declare("SwiftLint Version:")
+            Herald.declare("SwiftLint Version:", isNewCommand: true)
             try ShellRunner.run("swiftlint", arguments: ["version"])
 
             print("")

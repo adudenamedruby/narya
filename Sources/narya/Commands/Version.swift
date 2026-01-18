@@ -41,8 +41,6 @@ struct Version: ParsableCommand {
     private static let extensionsDir = "firefox-ios/Extensions"
 
     mutating func run() throws {
-        Herald.reset()
-
         // Validate we're in a firefox-ios repository
         let repo = try RepoDetector.requireValidRepo()
 
@@ -70,9 +68,9 @@ struct Version: ParsableCommand {
         let gitSha = getGitSha(repoRoot: repoRoot)
 
         if let sha = gitSha {
-            Herald.declare("\(version) (\(sha))")
+            Herald.declare("\(version) (\(sha))", isNewCommand: true)
         } else {
-            Herald.declare(version)
+            Herald.declare(version, isNewCommand: true)
         }
     }
 
@@ -110,7 +108,7 @@ struct Version: ParsableCommand {
 
         let newVersion = "\(newMajor).\(newMinor)"
 
-        Herald.declare("Bumping version: \(currentVersion) -> \(newVersion)")
+        Herald.declare("Bumping version: \(currentVersion) -> \(newVersion)", isNewCommand: true)
         try updateVersionInFiles(from: currentVersion, to: newVersion, repoRoot: repoRoot)
         Herald.declare("Version updated to \(newVersion)", asConclusion: true)
     }
@@ -124,11 +122,11 @@ struct Version: ParsableCommand {
         let currentVersion = try readVersion(repoRoot: repoRoot)
 
         if currentVersion == newVersion {
-            Herald.declare("Version is already \(newVersion)", asConclusion: true)
+            Herald.declare("Version is already \(newVersion)", isNewCommand: true, asConclusion: true)
             return
         }
 
-        Herald.declare("Setting version: \(currentVersion) -> \(newVersion)")
+        Herald.declare("Setting version: \(currentVersion) -> \(newVersion)", isNewCommand: true)
         try updateVersionInFiles(from: currentVersion, to: newVersion, repoRoot: repoRoot)
         Herald.declare("Version updated to \(newVersion)", asConclusion: true)
     }
@@ -137,7 +135,7 @@ struct Version: ParsableCommand {
 
     private func runVerify(repoRoot: URL) throws {
         let expectedVersion = try readVersion(repoRoot: repoRoot)
-        Herald.declare("Verifying version consistency (expected: \(expectedVersion))...")
+        Herald.declare("Verifying version consistency (expected: \(expectedVersion))...", isNewCommand: true)
 
         var mismatches: [(file: String, found: String?)] = []
 

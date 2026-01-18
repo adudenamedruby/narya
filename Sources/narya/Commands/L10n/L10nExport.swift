@@ -48,7 +48,6 @@ extension L10n {
         var createTemplates: Bool = false
 
         mutating func run() throws {
-            Herald.reset()
             try ToolChecker.requireXcodebuild()
 
             let locales: [String]
@@ -58,7 +57,7 @@ extension L10n {
                 locales = try L10nExportTask.discoverLocales(at: l10nProjectPath)
             }
 
-            Herald.declare("Exporting \(locales.count) locale(s) from \(projectPath)...")
+            Herald.declare("Exporting \(locales.count) locale(s) from \(projectPath)...", isNewCommand: true)
 
             try L10nExportTask(
                 xcodeProjPath: projectPath,
