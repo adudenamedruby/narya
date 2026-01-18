@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Client/en.lproj/InfoPlist.strings" source-language="en" target-language="fr">
+    <body>
+      <trans-unit id="CFBundleName">
+        <source>Firefox</source>
+        <target>Firefox</target>
+        <note>Bundle name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleDisplayName">
+        <source>Firefox</source>
+        <target>Firefox</target>
+        <note>Display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleShortVersionString">
+        <source>1.0</source>
+        <target>1.0</target>
+        <note>Version string</note>
+      </trans-unit>
+      <trans-unit id="NSCameraUsageDescription">
+        <source>Camera access for QR scanning</source>
+        <target>Acces camera pour scanner QR</target>
+        <note>Camera permission</note>
+      </trans-unit>
+      <trans-unit id="NSLocationWhenInUseUsageDescription">
+        <source>Location access</source>
+        <target>Acces a la localisation</target>
+        <note>Location permission</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Client/Strings.swift" source-language="en" target-language="fr">
+    <body>
+      <trans-unit id="Menu.OpenNewTab">
+        <source>Open New Tab</source>
+        <target>Ouvrir un nouvel onglet</target>
+        <note>Menu item</note>
+      </trans-unit>
+      <trans-unit id="Menu.Settings">
+        <source>Settings</source>
+        <target>Parametres</target>
+        <note>Menu item</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

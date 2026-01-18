@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Client/en.lproj/InfoPlist.strings" source-language="en" target-language="es">
+    <body>
+      <trans-unit id="NSCameraUsageDescription">
+        <source>Camera access for QR scanning</source>
+        <note>Camera permission - required translation without target</note>
+      </trans-unit>
+      <trans-unit id="NSLocationWhenInUseUsageDescription">
+        <source>Location access</source>
+        <target>Acceso a ubicacion</target>
+        <note>Location permission - has target</note>
+      </trans-unit>
+      <trans-unit id="ShortcutItemTitleNewTab">
+        <source>New Tab</source>
+        <note>Shortcut - required translation without target</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

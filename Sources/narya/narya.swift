@@ -21,6 +21,7 @@ struct Narya: ParsableCommand {
             Build.self,
             Clean.self,
             Doctor.self,
+            L10n.self,
             Lint.self,
             Nimbus.self,
             Run.self,

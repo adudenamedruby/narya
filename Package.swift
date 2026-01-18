@@ -22,7 +22,8 @@ let package = Package(
         ),
         .testTarget(
             name: "naryaTests",
-            dependencies: ["narya"]
+            dependencies: ["narya"],
+            exclude: ["Fixtures/L10n"]
         ),
     ]
 )

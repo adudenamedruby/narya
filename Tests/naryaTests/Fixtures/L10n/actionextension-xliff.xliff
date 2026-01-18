@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Extensions/ActionExtension/en.lproj/InfoPlist.strings" source-language="en" target-language="de">
+    <body>
+      <trans-unit id="CFBundleDisplayName">
+        <source>Open in Firefox</source>
+        <target>In Firefox offnen</target>
+        <note>Action extension display name</note>
+      </trans-unit>
+      <trans-unit id="CFBundleName">
+        <source>ActionExtension</source>
+        <target>Aktionserweiterung</target>
+        <note>Bundle name</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

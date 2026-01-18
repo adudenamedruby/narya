@@ -1,0 +1,3 @@
+NSCameraUsageDescription=Used for QR code scanning feature
+NSLocationWhenInUseUsageDescription=Used for location-based features
+Menu.OpenNewTab=Opens a new browser tab

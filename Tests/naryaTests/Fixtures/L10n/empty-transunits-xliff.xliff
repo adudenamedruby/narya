@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="Client/en.lproj/InfoPlist.strings" source-language="en" target-language="ja">
+    <body>
+      <trans-unit id="CFBundleName">
+        <source>Firefox</source>
+        <target>Firefox</target>
+        <note>Bundle name - will be excluded</note>
+      </trans-unit>
+      <trans-unit id="CFBundleDisplayName">
+        <source>Firefox</source>
+        <target>Firefox</target>
+        <note>Display name - will be excluded</note>
+      </trans-unit>
+    </body>
+  </file>
+  <file original="Client/Strings.swift" source-language="en" target-language="ja">
+    <body>
+      <trans-unit id="Menu.OpenNewTab">
+        <source>Open New Tab</source>
+        <target>新しいタブを開く</target>
+        <note>Menu item</note>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
