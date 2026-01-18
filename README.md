@@ -340,11 +340,13 @@ iPad:
 | miniA<chip> | miniA17 | iPad mini (A17 Pro) |
 | pad<N>g | pad10g | iPad (Nth generation) |
 | padA<chip> | padA16 | iPad (A16) |
-Matching behavior:
+
+Matching behavior precision notes:
 
 - pro13 matches both "13-inch" and "12.9-inch", but prefers exact match if both simulators exist
 - pro129 matches only "12.9-inch" (precise)
-- Devices that don't fit patterns get "-" and the user must pass in the full name
+
+**NOTE:** Devices that don't fit patterns get "-" and the user must pass in the full name. Matching every device uniquely is not a goal of the shorthand system which is why `--sim` also accepts full names for simulators
 
 ## License
 
