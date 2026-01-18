@@ -32,6 +32,19 @@ struct L10nErrorTests {
         #expect(description.contains("Failed to execute process"))
     }
 
+    @Test("commandFailed includes command and exit code")
+    func commandFailedMessage() {
+        let error = L10nError.commandFailed(
+            command: "xcodebuild -exportLocalizations",
+            exitCode: 65
+        )
+
+        let description = error.description
+        #expect(description.contains("xcodebuild -exportLocalizations"))
+        #expect(description.contains("65"))
+        #expect(description.contains("failed with exit code"))
+    }
+
     @Test("xmlParsingFailed includes path and error details")
     func xmlParsingFailedMessage() {
         let underlyingError = TestError(message: "Invalid XML structure")

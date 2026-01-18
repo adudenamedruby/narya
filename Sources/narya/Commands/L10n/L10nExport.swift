@@ -135,6 +135,13 @@ struct L10nExportTask {
             )
         }
         task.waitUntilExit()
+
+        if task.terminationStatus != 0 {
+            throw L10nError.commandFailed(
+                command: "xcodebuild -exportLocalizations",
+                exitCode: task.terminationStatus
+            )
+        }
     }
 
     /// Applies comment overrides to translations in a file node.

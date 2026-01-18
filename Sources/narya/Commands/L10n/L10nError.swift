@@ -9,6 +9,9 @@ enum L10nError: Error, CustomStringConvertible {
     /// Failed to execute an external process (e.g., xcodebuild).
     case processExecutionFailed(command: String, underlyingError: Error)
 
+    /// An external command ran but exited with a non-zero status.
+    case commandFailed(command: String, exitCode: Int32)
+
     /// Failed to parse an XML/XLIFF file.
     case xmlParsingFailed(path: String, underlyingError: Error)
 
@@ -43,6 +46,8 @@ enum L10nError: Error, CustomStringConvertible {
         switch self {
         case .processExecutionFailed(let command, let error):
             return "Failed to execute process '\(command)': \(error.localizedDescription)"
+        case .commandFailed(let command, let exitCode):
+            return "Command '\(command)' failed with exit code \(exitCode)"
         case .xmlParsingFailed(let path, let error):
             return "Failed to parse XML file at '\(path)': \(error.localizedDescription)"
         case .xpathQueryFailed(let xpath, let error):

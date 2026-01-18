@@ -206,6 +206,13 @@ struct L10nImportTask {
             throw L10nError.processExecutionFailed(command: "xcodebuild -importLocalizations", underlyingError: error)
         }
         task.waitUntilExit()
+
+        if task.terminationStatus != 0 {
+            throw L10nError.commandFailed(
+                command: "xcodebuild -importLocalizations",
+                exitCode: task.terminationStatus
+            )
+        }
     }
 
     /// Processes a single locale.
@@ -217,7 +224,8 @@ struct L10nImportTask {
 
     /// Executes the import task for all configured locales.
     func run() throws {
-        for locale in locales {
+        for (index, locale) in locales.enumerated() {
+            Herald.declare("[\(index + 1)/\(locales.count)] Importing \(locale)...")
             try prepareLocale(locale: locale)
         }
     }
