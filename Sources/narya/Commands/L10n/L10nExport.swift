@@ -246,8 +246,7 @@ struct L10nExportTask {
                 result[String(key)] = String(value)
             } ?? [:]
 
-        let errorsLock = NSLock()
-        var errors: [L10nError] = []
+        let errors = LockedArray<L10nError>()
 
         locales.forEach { locale in
             group.enter()
@@ -257,24 +256,20 @@ struct L10nExportTask {
                     try handleXML(path: exportBasePath, locale: locale, commentOverrides: commentOverrides)
                     try copyToL10NRepo(locale: locale)
                 } catch let error as L10nError {
-                    errorsLock.lock()
                     errors.append(error)
-                    errorsLock.unlock()
                 } catch {
-                    errorsLock.lock()
                     errors.append(.fileWriteFailed(path: locale, underlyingError: error))
-                    errorsLock.unlock()
                 }
             }
         }
 
         group.wait()
 
-        if !errors.isEmpty {
-            for error in errors {
+        if !errors.values.isEmpty {
+            for error in errors.values {
                 Herald.declare(error.description, asError: true)
             }
-            throw errors.first!
+            throw errors.values.first!
         }
     }
 }

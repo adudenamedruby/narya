@@ -13,7 +13,7 @@ struct Doctor: ParsableCommand {
 
     mutating func run() throws {
         Herald.declare("Checking development environment...", isNewCommand: true)
-        print("")
+        Herald.declare("")
 
         var issues: [String] = []
 
@@ -33,16 +33,17 @@ struct Doctor: ParsableCommand {
         // Repository context (optional)
         checkRepository(issues: &issues)
 
-        print("")
+        Herald.declare("")
 
         // Summary
         if issues.isEmpty {
             Herald.declare("All checks passed! Your environment is ready for development.", asConclusion: true)
         } else {
-            Herald.declare("Found \(issues.count) issue(s):")
+            var issuesString = "Found \(issues.count) issue(s):\n"
             for issue in issues {
-                print("▒   • \(issue)")
+                issuesString.append(" • \(issue)\n")
             }
+            Herald.declare("\(issuesString)", asError: true)
         }
     }
 
@@ -216,6 +217,6 @@ struct Doctor: ParsableCommand {
     private func printCheck(passed: Bool, tool: String, detail: String) {
         let symbol = passed ? "✓" : "✗"
         let paddedTool = tool.padding(toLength: 18, withPad: " ", startingAt: 0)
-        print("▒ \(symbol) \(paddedTool) \(detail)")
+        Herald.declare("\(symbol) \(paddedTool) \(detail)")
     }
 }
