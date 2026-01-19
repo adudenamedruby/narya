@@ -49,14 +49,6 @@ struct Setup: ParsableCommand {
         try ShellRunner.run("git", arguments: arguments)
         Herald.declare("Cloning done.")
 
-        // TODO: Remove this block once .narya.yaml is added to the firefox-ios repository
-        let markerPath = URL(fileURLWithPath: cloneDir)
-            .appendingPathComponent(Configuration.markerFileName)
-        let markerContent = "project: firefox-ios\n"
-        try markerContent.write(to: markerPath, atomically: true, encoding: .utf8)
-        Herald.declare("Created \(Configuration.markerFileName) marker file (temporary).")
-        // END TEMPORARY
-
         // Change into the cloned repository
         let clonePath = URL(fileURLWithPath: cloneDir).standardizedFileURL
         guard FileManager.default.changeCurrentDirectoryPath(clonePath.path) else {
