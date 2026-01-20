@@ -10,16 +10,16 @@ Named after Narya, the Ring of Fire, and one of the three Rings of the Elves, fo
 
 The goals of this tool are simple:
 
-1. Provide easily reproducible commands for all developers & CI
-2. Provide a central place for important utilities used to manage the firefox-ios repo
-3. Provide a thoroughly documented, understandable experience that will reduce tribal knowledge
+**1. Provide easily reproducible commands for all developers & CI**
+**2. Provide a central place for important utilities used to manage the firefox-ios repo**
+**3. Provide a thoroughly documented, understandable experience that will reduce tribal knowledge**
 
 ```
-⚠️ A fourth possible goal - we're still deciding if this is a goal for the tool:
+⚠️ A possible fourth goal - we're still deciding if this is truly a goal:
 Provide a simple, indirect way for new developers to discover tooling used in Swift development (eg. swiftlint)
 ```
 
-Bonus/most important goal: **be dope by being ridiculously helpful**
+Bonus (slash most important) goal: **be dope by being ridiculously helpful**
 
 If a command doesn't materially achieve one of these goals & the bonus goal, it likely shouldn't be part of `narya`
 
@@ -56,7 +56,7 @@ project: firefox-ios
 ### Requirements
 
 - macOS 14+
-- Swift 6.0+
+- Swift 6.2+
 
 To use this with the firefox-ios, repo, you will also need the dependencies from that repo.
 
