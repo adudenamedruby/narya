@@ -13,18 +13,15 @@ The goals of this tool are simple:
 1. Provide easily reproducible commands for all developers & CI
 2. Provide a central place for important utilities used to manage the firefox-ios repo
 3. Provide a thoroughly documented, understandable experience that will reduce tribal knowledge
-4. Provide a simple, indirect way for new developers to discover tooling used in Swift development
 
-Bonus/most important goal: be dope by being ridiculously helpful
+```
+⚠️ A fourth possible goal - we're still deciding if this is a goal for the tool:
+Provide a simple, indirect way for new developers to discover tooling used in Swift development (eg. swiftlint)
+```
+
+Bonus/most important goal: **be dope by being ridiculously helpful**
 
 If a command doesn't materially achieve one of these goals & the bonus goal, it likely shouldn't be part of `narya`
-
-## Requirements
-
-- macOS 14+
-- Swift 6.0+
-
-To use this with the firefox-ios, repo, you will also need the dependencies from that repo.
 
 ## Installation
 
@@ -54,7 +51,22 @@ A minimal `.narya.yaml` only needs the required `project` field:
 project: firefox-ios
 ```
 
-## Architecture
+## Development
+
+### Requirements
+
+- macOS 14+
+- Swift 6.0+
+
+To use this with the firefox-ios, repo, you will also need the dependencies from that repo.
+
+### Contributing
+
+Contributing to `narya` is easy: please fork the repo, make your changes, and submit a PR.
+
+For a discussion of the design thoughts behind `narya`, and what to add, please first read the [GUIDELINES](https://github.com/adudenamedruby/narya/blob/main/GUIDELINES.md) document.
+
+### Architecture
 
 ```
 Sources/narya/
@@ -73,12 +85,6 @@ Sources/narya/
 │   └── ToolChecker.swift       # Tool availability checks (git, node, npm, xcodebuild)
 └── Commands/
 ```
-
-## Development & Contribution
-
-Contributing to `narya` is easy: please fork the repo, make your changes, and submit a PR.
-
-For a discussion of the design thoughts behind `narya`, and what to add, please first read the [GUIDELINES](https://github.com/adudenamedruby/narya/blob/main/GUIDELINES.md) document.
 
 ### Dev Notes
 

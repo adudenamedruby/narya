@@ -16,22 +16,11 @@ struct L10n: ParsableCommand {
         discussion: """
             Tools for automating localization workflows in Mozilla iOS projects.
 
-            The l10n command provides three subcommands:
-
-            • export - Extract localizable strings from Xcode to XLIFF files
-            • import - Import translated XLIFF files back into Xcode
-            • templates - Create blank template XLIFF files for translators
-
-            These commands handle:
+            The l10n subcommands will handle:
             - Locale code mapping between Xcode and Pontoon formats
             - Filtering of non-translatable keys (CFBundleName, etc.)
             - Required translation validation (privacy permissions, shortcuts)
             - Comment overrides from l10n_comments.txt
-
-            Examples:
-              narya l10n export --project-path ./Client.xcodeproj --l10n-project-path ../l10n
-              narya l10n import --project-path ./Client.xcodeproj --l10n-project-path ../l10n
-              narya l10n templates --l10n-project-path ../l10n
             """,
         subcommands: [
             Export.self,
