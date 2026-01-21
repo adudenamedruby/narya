@@ -64,9 +64,11 @@ To use this with the firefox-ios, repo, you will also need the dependencies from
 
 Contributing to `narya` is easy: please fork the repo, make your changes, and submit a PR.
 
-For a discussion of the design thoughts behind `narya`, and what to add, please first read the [GUIDELINES](https://github.com/adudenamedruby/narya/blob/main/GUIDELINES.md) document.
+For a discussion of the design thoughts behind `narya`, and what to add, please first read the [DESIGN_GUIDELINES.md](DESIGN_GUIDELINES.md) document.
 
-### Architecture
+For details on how commands are structured and how to add new ones, see [COMMAND_ARCHITECTURE.md](COMMAND_ARCHITECTURE.md).
+
+### Project structure
 
 ```
 Sources/narya/
