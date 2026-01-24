@@ -10,8 +10,8 @@ struct Setup: ParsableCommand {
         abstract: "Clone and bootstrap the firefox-ios repository."
     )
 
-    @Flag(name: .long, help: "Use SSH URL for cloning (git@github.com:...) instead of HTTPS.")
-    var ssh = false
+    @Flag(name: .long, help: "Use HTTPS URL for cloning (https://github.com/...) instead of SSH.")
+    var https = false
 
     @Option(name: .long, help: "Directory path (absolute or relative) to clone into. Defaults to current directory.")
     var location: String?
@@ -28,9 +28,9 @@ struct Setup: ParsableCommand {
         try ToolChecker.requireNode()
         try ToolChecker.requireNpm()
 
-        let repoURL = ssh
-            ? "git@github.com:mozilla-mobile/firefox-ios.git"
-            : "https://github.com/mozilla-mobile/firefox-ios.git"
+        let repoURL = https
+            ? "https://github.com/mozilla-mobile/firefox-ios.git"
+            : "git@github.com:mozilla-mobile/firefox-ios.git"
 
         // Determine the clone destination
         let cloneDir: String
