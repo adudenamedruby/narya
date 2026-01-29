@@ -15,11 +15,8 @@ struct ListSims: ParsableCommand {
         abstract: "List available simulators and their shorthand codes."
     )
 
-    @Flag(name: .long, help: "Use file-based flow for simctl commands (writes JSON to temp files before parsing).")
-    var file: Bool = false
-
     func run() throws {
-        try CommandHelpers.printSimulatorList(useFileFlow: file)
+        try CommandHelpers.printSimulatorList()
     }
 }
 
@@ -44,11 +41,10 @@ enum CommandHelpers {
     // MARK: - Simulator Utilities
 
     /// Prints a formatted table of available iOS simulators with their shorthand codes
-    /// - Parameter useFileFlow: If true, writes simctl JSON output to temp files before parsing (for debugging hang issues)
-    static func printSimulatorList(useFileFlow: Bool = false) throws {
+    static func printSimulatorList() throws {
         try ToolChecker.requireSimctl()
 
-        let simulatorsByRuntime = try SimulatorManager.listSimulators(useFileFlow: useFileFlow)
+        let simulatorsByRuntime = try SimulatorManager.listSimulators()
 
         guard !simulatorsByRuntime.isEmpty else {
             Herald.declare("No iOS simulators found. Please install simulators via Xcode.", isNewCommand: true)
