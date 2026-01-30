@@ -9,12 +9,10 @@ import Testing
 /// Tests for L10nLocaleMapping functionality.
 @Suite("L10nLocaleMapping Tests")
 struct L10nLocaleMappingTests {
-
     // MARK: - Pontoon to Xcode Mapping Tests
 
     @Suite("Pontoon to Xcode Mapping")
     struct PontoonToXcodeTests {
-
         @Test("Maps ga-IE to ga")
         func mapsGaIE() {
             #expect(L10nLocaleMapping.toXcode("ga-IE") == "ga")

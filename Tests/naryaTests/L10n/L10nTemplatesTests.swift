@@ -9,12 +9,10 @@ import Testing
 /// Tests for L10n Templates functionality.
 @Suite("L10n Templates Tests")
 struct L10nTemplatesTests {
-
     // MARK: - Task Configuration Tests
 
     @Suite("Template Task Configuration")
     struct TaskConfigurationTests {
-
         @Test("Creates task with valid configuration")
         func createsTaskWithValidConfiguration() {
             let task = L10nTemplatesTask(

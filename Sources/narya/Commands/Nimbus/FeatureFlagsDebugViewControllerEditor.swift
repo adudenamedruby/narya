@@ -33,16 +33,14 @@ enum FeatureFlagsDebugViewControllerEditor {
                 // Look for FeatureFlagsBoolSetting blocks
                 if line.contains("FeatureFlagsBoolSetting(") {
                     // Extract the titleText from the next few lines
-                    for i in index..<min(index + 5, lines.count) {
-                        if lines[i].contains("titleText:") {
-                            if let titleRange = lines[i].range(of: "\"([^\"]+)\"", options: .regularExpression) {
-                                let existingTitle = String(lines[i][titleRange]).replacingOccurrences(of: "\"", with: "")
-                                if existingTitle > titleText && insertIndex == nil {
-                                    insertIndex = index
-                                }
+                    for i in index..<min(index + 5, lines.count) where lines[i].contains("titleText:") {
+                        if let titleRange = lines[i].range(of: "\"([^\"]+)\"", options: .regularExpression) {
+                            let existingTitle = String(lines[i][titleRange]).replacingOccurrences(of: "\"", with: "")
+                            if existingTitle > titleText && insertIndex == nil {
+                                insertIndex = index
                             }
-                            break
                         }
+                        break
                     }
                 }
 
@@ -100,25 +98,21 @@ enum FeatureFlagsDebugViewControllerEditor {
         var blockStart: Int?
         var blockEnd: Int?
 
-        for (index, line) in lines.enumerated() {
-            if line.contains("with: .\(name),") {
-                // Find the start of this block (FeatureFlagsBoolSetting line)
-                for i in stride(from: index, through: max(0, index - 5), by: -1) {
-                    if lines[i].contains("FeatureFlagsBoolSetting(") {
-                        blockStart = i
-                        break
-                    }
-                }
-
-                // Find the end of this block (}, line)
-                for i in index..<min(index + 10, lines.count) {
-                    if lines[i].trimmingCharacters(in: .whitespaces) == "}," {
-                        blockEnd = i
-                        break
-                    }
-                }
+        for (index, line) in lines.enumerated() where line.contains("with: .\(name),") {
+            // Find the start of this block (FeatureFlagsBoolSetting line)
+            for i in stride(from: index, through: max(0, index - 5), by: -1)
+                where lines[i].contains("FeatureFlagsBoolSetting(") {
+                blockStart = i
                 break
             }
+
+            // Find the end of this block (}, line)
+            for i in index..<min(index + 10, lines.count)
+                where lines[i].trimmingCharacters(in: .whitespaces) == "}," {
+                blockEnd = i
+                break
+            }
+            break
         }
 
         guard let start = blockStart, let end = blockEnd else {

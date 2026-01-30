@@ -9,12 +9,10 @@ import Testing
 /// Tests for L10n Export functionality.
 @Suite("L10n Export Tests")
 struct L10nExportTests {
-
     // MARK: - Locale Discovery Tests
 
     @Suite("Locale Discovery")
     struct LocaleDiscoveryTests {
-
         @Test("Discovers locales from directory structure")
         func discoversLocalesFromDirectories() throws {
             try withL10nTemporaryDirectory { tempDir in

@@ -28,7 +28,7 @@ struct Narya: ParsableCommand {
             Setup.self,
             Telemetry.self,
             Test.self,
-            Version.self,
+            Version.self
         ],
         defaultSubcommand: nil
     )

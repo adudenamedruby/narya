@@ -26,5 +26,6 @@ enum NimbusConstants {
     static let nimbusFeaturesPath = "firefox-ios/nimbus-features"
     static let nimbusFlaggableFeaturePath = "firefox-ios/Client/FeatureFlags/NimbusFlaggableFeature.swift"
     static let nimbusFeatureFlagLayerPath = "firefox-ios/Client/Nimbus/NimbusFeatureFlagLayer.swift"
+    // swiftlint:disable:next line_length
     static let featureFlagsDebugViewControllerPath = "firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift"
 }

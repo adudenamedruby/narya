@@ -142,7 +142,6 @@ struct Doctor: ParsableCommand {
             // Display merged configuration (defaults are always present)
             printCheck(passed: true, tool: "default build", detail: repo.config.defaultBuildProduct)
             printCheck(passed: true, tool: "default bootstrap", detail: repo.config.defaultBootstrap)
-
         } catch {
             printCheck(passed: false, tool: "firefox-ios repo", detail: "not detected")
             Herald.declare("Run from a firefox-ios repository for full checks")

@@ -26,15 +26,6 @@ struct L10nXliffProcessor {
     /// The operation mode for locale mapping direction.
     let mode: Mode
 
-    /// Initializes a processor with the specified configuration.
-    /// - Parameters:
-    ///   - excludedTranslations: Keys to filter out during processing
-    ///   - mode: Operation mode determining locale mapping direction
-    init(excludedTranslations: Set<String>, mode: Mode) {
-        self.excludedTranslations = excludedTranslations
-        self.mode = mode
-    }
-
     /// Returns the mapped locale code based on the operation mode.
     private func mappedLocale(for locale: String) -> String? {
         switch mode {

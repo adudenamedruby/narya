@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// swiftlint:disable force_cast
+
 import Foundation
 import Testing
 @testable import narya
@@ -9,12 +11,10 @@ import Testing
 /// Tests for L10n Import functionality.
 @Suite("L10n Import Tests")
 struct L10nImportTests {
-
     // MARK: - Required Translations Tests
 
     @Suite("Required Translations")
     struct RequiredTranslationsTests {
-
         @Test("Base required translations include privacy descriptions")
         func includesPrivacyDescriptions() {
             let privacyKeys = [

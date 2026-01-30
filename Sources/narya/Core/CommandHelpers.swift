@@ -52,6 +52,7 @@ enum CommandHelpers {
         }
 
         // Gather unique devices with their available iOS versions
+        // swiftlint:disable:next large_tuple
         var deviceInfo: [String: (shorthand: String?, versions: [String], isBooted: Bool)] = [:]
 
         for (runtime, devices) in simulatorsByRuntime {

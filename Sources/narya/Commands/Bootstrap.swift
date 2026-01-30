@@ -128,10 +128,11 @@ struct Bootstrap: ParsableCommand {
             try fileManager.removeItem(at: shavarDir)
         }
 
-        try ShellRunner.run("git", arguments: [
-            "clone",
-            "https://github.com/mozilla-services/shavar-prod-lists.git"
-        ], workingDirectory: repoRoot)
+        try ShellRunner.run(
+            "git",
+            arguments: ["clone", "https://github.com/mozilla-services/shavar-prod-lists.git"],
+            workingDirectory: repoRoot
+        )
         try ShellRunner.run("git", arguments: [
             "-C", shavarDir.path,
             "checkout", shavarCommitHash

@@ -63,7 +63,7 @@ struct Test: ParsableCommand {
     // MARK: - Test Options
 
     @Option(name: .long, help: "Maximum test retries on failure (default: 0).")
-    var retries: Int = 0
+    var retries = 0
 
     // MARK: - Workflow Options
 
@@ -268,5 +268,4 @@ struct Test: ParsableCommand {
         Herald.raw("# Run \(plan.displayName)")
         Herald.raw(CommandHelpers.formatCommand("xcodebuild", arguments: testArgs))
     }
-
 }

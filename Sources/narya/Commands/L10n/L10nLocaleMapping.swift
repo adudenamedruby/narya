@@ -21,7 +21,7 @@ enum L10nLocaleMapping {
         "sv-SE": "sv",
         "tl": "fil",
         "sat": "sat-Olck",
-        "zgh": "tzm",
+        "zgh": "tzm"
     ]
 
     /// Maps Xcode locale codes to Pontoon locale codes.

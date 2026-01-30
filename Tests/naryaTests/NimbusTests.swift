@@ -442,7 +442,8 @@ struct NimbusTests {
         #expect(flaggableContent.contains(".beta"))
 
         // Check FeatureFlagsDebugViewController.swift
-        let debugVCPath = repoDir.appendingPathComponent("firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
+        let debugVCPath = repoDir.appendingPathComponent(
+            "firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
         let debugVCContent = try String(contentsOf: debugVCPath, encoding: .utf8)
         #expect(debugVCContent.contains("with: .beta,"))
         #expect(debugVCContent.contains("\"Beta\""))
@@ -647,7 +648,8 @@ struct NimbusTests {
         #expect(!flagLayerContent.contains("checkBetaFeature"))
 
         // Check FeatureFlagsDebugViewController.swift
-        let debugVCPath = repoDir.appendingPathComponent("firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
+        let debugVCPath = repoDir.appendingPathComponent(
+            "firefox-ios/Client/Frontend/Settings/Main/Debug/FeatureFlags/FeatureFlagsDebugViewController.swift")
         let debugVCContent = try String(contentsOf: debugVCPath, encoding: .utf8)
         #expect(!debugVCContent.contains("with: .beta,"))
     }
@@ -702,6 +704,6 @@ struct NimbusTests {
     func capitalizeFirstCapitalizes() {
         #expect(NimbusHelpers.capitalizeFirst("test") == "Test")
         #expect(NimbusHelpers.capitalizeFirst("Test") == "Test")
-        #expect(NimbusHelpers.capitalizeFirst("") == "")
+        #expect(NimbusHelpers.capitalizeFirst("").isEmpty)
     }
 }

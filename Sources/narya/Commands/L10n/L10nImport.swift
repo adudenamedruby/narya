@@ -163,7 +163,10 @@ struct L10nImportTask {
                 let nodes = (try? translation.nodes(forXPath: "target")) ?? []
                 let source = ((try? translation.nodes(forXPath: "source").first)?.stringValue) ?? ""
                 if nodes.isEmpty {
-                    let element = XMLNode.element(withName: "target", stringValue: source) as! XMLNode
+                    guard let element = XMLNode.element(
+                        withName: "target",
+                        stringValue: source
+                    ) as? XMLNode else { continue }
                     translation.insertChild(element, at: 1)
                 }
             }

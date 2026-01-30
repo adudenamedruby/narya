@@ -8,7 +8,6 @@ import Testing
 
 @Suite("StringUtils Tests", .serialized)
 struct StringUtilsTests {
-
     // MARK: - camelToSnakeCase Tests
 
     @Test("camelToSnakeCase converts simple camelCase")
@@ -25,7 +24,7 @@ struct StringUtilsTests {
 
     @Test("camelToSnakeCase handles empty string")
     func camelToSnakeCaseEmpty() {
-        #expect(StringUtils.camelToSnakeCase("") == "")
+        #expect(StringUtils.camelToSnakeCase("").isEmpty)
     }
 
     @Test("camelToSnakeCase handles single character")
@@ -68,7 +67,7 @@ struct StringUtilsTests {
 
     @Test("camelToKebabCase handles empty string")
     func camelToKebabCaseEmpty() {
-        #expect(StringUtils.camelToKebabCase("") == "")
+        #expect(StringUtils.camelToKebabCase("").isEmpty)
     }
 
     @Test("camelToKebabCase handles single character")
@@ -111,7 +110,7 @@ struct StringUtilsTests {
 
     @Test("camelToTitleCase handles empty string")
     func camelToTitleCaseEmpty() {
-        #expect(StringUtils.camelToTitleCase("") == "")
+        #expect(StringUtils.camelToTitleCase("").isEmpty)
     }
 
     @Test("camelToTitleCase handles single character")
@@ -148,7 +147,7 @@ struct StringUtilsTests {
 
     @Test("capitalizeFirst handles empty string")
     func capitalizeFirstEmpty() {
-        #expect(StringUtils.capitalizeFirst("") == "")
+        #expect(StringUtils.capitalizeFirst("").isEmpty)
     }
 
     @Test("capitalizeFirst handles single character")

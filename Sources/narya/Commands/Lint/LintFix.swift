@@ -105,7 +105,8 @@ extension Lint {
                 Herald.raw("BASE=$(git merge-base HEAD main)")
                 Herald.raw("")
                 Herald.raw("# Find changed Swift files")
-                Herald.raw(CommandHelpers.formatCommand("git", arguments: ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]))
+                let gitArgs = ["diff", "--name-only", "--diff-filter=ACMR", "$BASE...HEAD"]
+                Herald.raw(CommandHelpers.formatCommand("git", arguments: gitArgs))
                 Herald.raw("")
 
                 let args: [String] = ["lint", "--fix", "--config", configPath, "--path", "<file>"]

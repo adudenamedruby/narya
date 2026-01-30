@@ -8,7 +8,6 @@ import Testing
 
 @Suite("SimulatorManager Tests", .serialized)
 struct SimulatorManagerTests {
-
     // MARK: - isPreferredSimulator Tests
 
     @Test("iPhone 16 is preferred")
@@ -91,8 +90,18 @@ struct SimulatorManagerTests {
 
     @Test("SimulatorSelection contains correct data")
     func simulatorSelectionData() {
-        let sim = Simulator(udid: "test-udid", name: "iPhone 16", state: "Shutdown", isAvailable: true)
-        let runtime = SimulatorRuntime(identifier: "com.apple.CoreSimulator.iOS-18-2", name: "iOS 18.2", version: "18.2", isAvailable: true)
+        let sim = Simulator(
+            udid: "test-udid",
+            name: "iPhone 16",
+            state: "Shutdown",
+            isAvailable: true
+        )
+        let runtime = SimulatorRuntime(
+            identifier: "com.apple.CoreSimulator.iOS-18-2",
+            name: "iOS 18.2",
+            version: "18.2",
+            isAvailable: true
+        )
         let selection = SimulatorSelection(simulator: sim, runtime: runtime)
 
         #expect(selection.simulator.name == "iPhone 16")

@@ -9,7 +9,6 @@ import Testing
 /// Tests for Logger utility.
 @Suite("Logger Tests")
 struct LoggerTests {
-
     /// A simple test error for testing.
     struct TestError: Error, LocalizedError {
         let message: String

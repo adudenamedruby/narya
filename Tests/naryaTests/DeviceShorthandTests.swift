@@ -8,7 +8,6 @@ import Testing
 
 @Suite("DeviceShorthand Tests", .serialized)
 struct DeviceShorthandTests {
-
     // MARK: - iPhone Shorthand Derivation Tests
 
     @Test("iPhone base model derives shorthand")

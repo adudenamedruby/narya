@@ -288,9 +288,16 @@ struct Version: ParsableCommand {
         try updatedContent.write(to: url, atomically: true, encoding: .utf8)
     }
 
-    private func updateExtensionInfoPlists(in extensionsDir: URL, from currentVersion: String, to newVersion: String) throws {
+    private func updateExtensionInfoPlists(
+        in extensionsDir: URL,
+        from currentVersion: String,
+        to newVersion: String
+    ) throws {
         let fileManager = FileManager.default
-        let extensionDirs = try fileManager.contentsOfDirectory(at: extensionsDir, includingPropertiesForKeys: [.isDirectoryKey])
+        let extensionDirs = try fileManager.contentsOfDirectory(
+            at: extensionsDir,
+            includingPropertiesForKeys: [.isDirectoryKey]
+        )
 
         for extDir in extensionDirs {
             let resourceValues = try extDir.resourceValues(forKeys: [.isDirectoryKey])

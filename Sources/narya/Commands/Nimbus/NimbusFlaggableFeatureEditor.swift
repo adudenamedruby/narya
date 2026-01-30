@@ -49,7 +49,7 @@ enum NimbusFlaggableFeatureEditor {
 
         // 2. Check if in debugKey and try to remove
         let wasInDebugKey = isInDebugKey(name: name, content: originalContent)
-        var debugKeyRemoved: Bool? = nil
+        var debugKeyRemoved: Bool?
         if wasInDebugKey {
             let (contentAfterDebug, removed) = removeFromDebugKey(name: name, from: content)
             content = contentAfterDebug
@@ -314,19 +314,18 @@ enum NimbusFlaggableFeatureEditor {
         var removeStart: Int?
         var removeEnd: Int?
 
-        for (index, line) in lines.enumerated() {
-            if line.trimmingCharacters(in: .whitespaces) == "case .\(name):" {
-                removeStart = index
-                // Find the end of this case (next case or default)
-                for i in (index + 1)..<lines.count {
-                    let nextLine = lines[i].trimmingCharacters(in: .whitespaces)
-                    if nextLine.hasPrefix("case ") || nextLine.hasPrefix("//") {
-                        removeEnd = i
-                        break
-                    }
+        for (index, line) in lines.enumerated()
+            where line.trimmingCharacters(in: .whitespaces) == "case .\(name):" {
+            removeStart = index
+            // Find the end of this case (next case or default)
+            for i in (index + 1)..<lines.count {
+                let nextLine = lines[i].trimmingCharacters(in: .whitespaces)
+                if nextLine.hasPrefix("case ") || nextLine.hasPrefix("//") {
+                    removeEnd = i
+                    break
                 }
-                break
             }
+            break
         }
 
         if let start = removeStart, let end = removeEnd {

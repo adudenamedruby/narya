@@ -65,44 +65,7 @@ extension Nimbus {
             }
 
             // 3. Remove from NimbusFlaggableFeature.swift
-            Herald.declare("Updating NimbusFlaggableFeature.swift...")
-            if FileManager.default.fileExists(atPath: flaggableFeaturePath.path) {
-                do {
-                    let result = try NimbusFlaggableFeatureEditor.removeFeature(
-                        name: cleanName,
-                        filePath: flaggableFeaturePath
-                    )
-
-                    if result.enumCaseRemoved {
-                        reportSuccess("Removed enum case")
-                    } else {
-                        reportFailure("Could not find enum case 'case \(cleanName)'")
-                        hasFailures = true
-                    }
-
-                    if let debugKeyRemoved = result.debugKeyRemoved {
-                        if debugKeyRemoved {
-                            reportSuccess("Removed from debugKey")
-                        } else {
-                            reportFailure("Found in debugKey but could not remove")
-                            hasFailures = true
-                        }
-                    }
-
-                    if result.featureKeyRemoved {
-                        reportSuccess("Removed from featureKey")
-                    } else {
-                        reportFailure("Could not find/remove from featureKey")
-                        hasFailures = true
-                    }
-                } catch {
-                    reportFailure("Failed to process file: \(error.localizedDescription)")
-                    hasFailures = true
-                }
-            } else {
-                reportFailure("File not found")
-                hasFailures = true
-            }
+            hasFailures = removeFlaggableFeature(cleanName, from: flaggableFeaturePath) || hasFailures
 
             // 4. Remove from NimbusFeatureFlagLayer.swift
             Herald.declare("Updating NimbusFeatureFlagLayer.swift...")
@@ -168,6 +131,51 @@ extension Nimbus {
             } else {
                 Herald.declare("Successfully removed feature '\(cleanName)'", asConclusion: true)
             }
+        }
+
+        // MARK: - Helpers
+
+        /// Removes the feature from NimbusFlaggableFeature.swift. Returns true if any failures occurred.
+        private func removeFlaggableFeature(_ name: String, from path: URL) -> Bool {
+            Herald.declare("Updating NimbusFlaggableFeature.swift...")
+            var hasFailures = false
+
+            guard FileManager.default.fileExists(atPath: path.path) else {
+                reportFailure("File not found")
+                return true
+            }
+
+            do {
+                let result = try NimbusFlaggableFeatureEditor.removeFeature(name: name, filePath: path)
+
+                if result.enumCaseRemoved {
+                    reportSuccess("Removed enum case")
+                } else {
+                    reportFailure("Could not find enum case 'case \(name)'")
+                    hasFailures = true
+                }
+
+                if let debugKeyRemoved = result.debugKeyRemoved {
+                    if debugKeyRemoved {
+                        reportSuccess("Removed from debugKey")
+                    } else {
+                        reportFailure("Found in debugKey but could not remove")
+                        hasFailures = true
+                    }
+                }
+
+                if result.featureKeyRemoved {
+                    reportSuccess("Removed from featureKey")
+                } else {
+                    reportFailure("Could not find/remove from featureKey")
+                    hasFailures = true
+                }
+            } catch {
+                reportFailure("Failed to process file: \(error.localizedDescription)")
+                hasFailures = true
+            }
+
+            return hasFailures
         }
 
         // MARK: - Status Reporting

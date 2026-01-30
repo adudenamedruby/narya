@@ -52,7 +52,7 @@ extension L10n {
         var exportBasePath: String?
 
         @Flag(name: .customLong("create-templates"), help: "Create template XLIFF files after export.")
-        var createTemplates: Bool = false
+        var createTemplates = false
 
         mutating func validate() throws {
             if product != nil && projectPath != nil {

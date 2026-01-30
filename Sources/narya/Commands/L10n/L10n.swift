@@ -25,7 +25,7 @@ struct L10n: ParsableCommand {
         subcommands: [
             Export.self,
             Import.self,
-            Templates.self,
+            Templates.self
         ]
     )
 }

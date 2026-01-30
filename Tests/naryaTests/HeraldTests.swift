@@ -8,7 +8,6 @@ import Testing
 
 @Suite("Herald Tests", .serialized)
 struct HeraldTests {
-
     // MARK: - Test Helpers
     private let indentChar = "▒"
 

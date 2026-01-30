@@ -10,12 +10,10 @@ import Testing
 /// Tests for the main L10n command and its configuration.
 @Suite("L10n Command Tests")
 struct L10nCommandTests {
-
     // MARK: - Command Configuration Tests
 
     @Suite("Command Configuration")
     struct ConfigurationTests {
-
         @Test("Command has correct name")
         func commandName() {
             #expect(L10n.configuration.commandName == "l10n")

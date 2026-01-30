@@ -100,11 +100,10 @@ enum NimbusFeatureFlagLayerEditor {
         // Find and remove the case block (case line + return line + possible blank line before)
         var caseIndex: Int?
 
-        for (index, line) in lines.enumerated() {
-            if line.trimmingCharacters(in: .whitespaces) == "case .\(name):" {
-                caseIndex = index
-                break
-            }
+        for (index, line) in lines.enumerated()
+            where line.trimmingCharacters(in: .whitespaces) == "case .\(name):" {
+            caseIndex = index
+            break
         }
 
         guard let index = caseIndex else {

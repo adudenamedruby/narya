@@ -104,13 +104,15 @@ private struct ParsedShorthand {
 enum DeviceShorthand {
     // MARK: - Cached Regex Patterns
 
-    /// Pre-compiled regex patterns to avoid repeated compilation
+    // swiftlint:disable force_try line_length
+    /// Pre-compiled regex patterns to avoid repeated compilation (force_try safe for static literals)
     private static let phoneNumberPattern = try! NSRegularExpression(pattern: #"^(\d+)(e|pro|max|plus)?$"#, options: .caseInsensitive)
     private static let miniGenPattern = try! NSRegularExpression(pattern: #"^mini(\d+)g$"#, options: .caseInsensitive)
     private static let miniChipPattern = try! NSRegularExpression(pattern: #"^minia(\d+)$"#, options: .caseInsensitive)
     private static let padGenerationPattern = try! NSRegularExpression(pattern: #"^pad(\d+)g$"#, options: .caseInsensitive)
     private static let padChipPattern = try! NSRegularExpression(pattern: #"^pada(\d+)$"#, options: .caseInsensitive)
     private static let ipadSizePattern = try! NSRegularExpression(pattern: #"^(air|pro)(\d+)$"#, options: .caseInsensitive)
+    // swiftlint:enable force_try line_length
 
     // MARK: - Public API
 
@@ -230,7 +232,8 @@ enum DeviceShorthand {
         }
 
         // Use cached pattern: <number>[e|pro|max|plus]
-        guard let match = phoneNumberPattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)) else {
+        let range = NSRange(shorthand.startIndex..., in: shorthand)
+        guard let match = phoneNumberPattern.firstMatch(in: shorthand, range: range) else {
             return nil
         }
 
@@ -241,7 +244,7 @@ enum DeviceShorthand {
         let number = String(shorthand[numberRange])
 
         // Extract suffix (if any)
-        var suffix: String? = nil
+        var suffix: String?
         if match.range(at: 2).location != NSNotFound,
            let suffixRange = Range(match.range(at: 2), in: shorthand) {
             suffix = String(shorthand[suffixRange])
@@ -284,13 +287,15 @@ enum DeviceShorthand {
     /// - `pad10g` → iPad (10th generation)
     /// - `padA16` → iPad (A16)
     private static func ipadPattern(for shorthand: String) -> (pattern: String, fallback: String?)? {
+        let range = NSRange(shorthand.startIndex..., in: shorthand)
+
         // Special case: mini (any)
         if shorthand == "mini" {
             return ("^iPad mini", nil)
         }
 
         // mini<N>g → iPad mini (Nth generation)
-        if let genMatch = miniGenPattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)),
+        if let genMatch = miniGenPattern.firstMatch(in: shorthand, range: range),
            let genRange = Range(genMatch.range(at: 1), in: shorthand) {
             let generation = String(shorthand[genRange])
             let ordinal = ordinalPattern(for: generation)
@@ -298,7 +303,7 @@ enum DeviceShorthand {
         }
 
         // miniA<chip> → iPad mini (A<chip> Pro) or iPad mini (A<chip>)
-        if let chipMatch = miniChipPattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)),
+        if let chipMatch = miniChipPattern.firstMatch(in: shorthand, range: range),
            let chipRange = Range(chipMatch.range(at: 1), in: shorthand) {
             let chip = String(shorthand[chipRange])
             // Match both "iPad mini (A17 Pro)" and "iPad mini (A17)"
@@ -306,7 +311,7 @@ enum DeviceShorthand {
         }
 
         // pad<N>g → iPad (Nth generation)
-        if let genMatch = padGenerationPattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)),
+        if let genMatch = padGenerationPattern.firstMatch(in: shorthand, range: range),
            let genRange = Range(genMatch.range(at: 1), in: shorthand) {
             let generation = String(shorthand[genRange])
             let ordinal = ordinalPattern(for: generation)
@@ -314,14 +319,14 @@ enum DeviceShorthand {
         }
 
         // padA<chip> → iPad (A<chip>)
-        if let chipMatch = padChipPattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)),
+        if let chipMatch = padChipPattern.firstMatch(in: shorthand, range: range),
            let chipRange = Range(chipMatch.range(at: 1), in: shorthand) {
             let chip = String(shorthand[chipRange])
             return ("^iPad \\(A\(chip)\\)$", nil)
         }
 
         // Pattern: <type><size> where type is air|pro and size is a number
-        guard let match = ipadSizePattern.firstMatch(in: shorthand, range: NSRange(shorthand.startIndex..., in: shorthand)) else {
+        guard let match = ipadSizePattern.firstMatch(in: shorthand, range: range) else {
             return nil
         }
 
@@ -406,22 +411,30 @@ enum DeviceShorthand {
         }
         // iPhone 16e
         if let match = deviceName.range(of: #"^iPhone (\d+)e$"#, options: .regularExpression) {
-            let number = deviceName[match].replacingOccurrences(of: "iPhone ", with: "").replacingOccurrences(of: "e", with: "")
+            let number = deviceName[match]
+                .replacingOccurrences(of: "iPhone ", with: "")
+                .replacingOccurrences(of: "e", with: "")
             return "\(number)e"
         }
         // iPhone XX Pro Max
         if let match = deviceName.range(of: #"^iPhone (\d+) Pro Max$"#, options: .regularExpression) {
-            let number = deviceName[match].replacingOccurrences(of: "iPhone ", with: "").replacingOccurrences(of: " Pro Max", with: "")
+            let number = deviceName[match]
+                .replacingOccurrences(of: "iPhone ", with: "")
+                .replacingOccurrences(of: " Pro Max", with: "")
             return "\(number)max"
         }
         // iPhone XX Pro
         if let match = deviceName.range(of: #"^iPhone (\d+) Pro$"#, options: .regularExpression) {
-            let number = deviceName[match].replacingOccurrences(of: "iPhone ", with: "").replacingOccurrences(of: " Pro", with: "")
+            let number = deviceName[match]
+                .replacingOccurrences(of: "iPhone ", with: "")
+                .replacingOccurrences(of: " Pro", with: "")
             return "\(number)pro"
         }
         // iPhone XX Plus
         if let match = deviceName.range(of: #"^iPhone (\d+) Plus$"#, options: .regularExpression) {
-            let number = deviceName[match].replacingOccurrences(of: "iPhone ", with: "").replacingOccurrences(of: " Plus", with: "")
+            let number = deviceName[match]
+                .replacingOccurrences(of: "iPhone ", with: "")
+                .replacingOccurrences(of: " Plus", with: "")
             return "\(number)plus"
         }
         // iPhone XX (base model)

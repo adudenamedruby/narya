@@ -177,7 +177,8 @@ enum SimulatorManager {
         for (runtime, devices) in simulatorsByRuntime {
             // First priority: numbered base iPhone (e.g., "iPhone 17", "iPhone 16")
             let numberedDevices = devices.filter { isNumberedBaseIPhone($0.name) }
-            if let device = numberedDevices.sorted(by: { extractIPhoneNumber($0.name) > extractIPhoneNumber($1.name) }).first {
+            let sorted = numberedDevices.sorted { extractIPhoneNumber($0.name) > extractIPhoneNumber($1.name) }
+            if let device = sorted.first {
                 return SimulatorSelection(simulator: device, runtime: runtime)
             }
 
@@ -304,16 +305,12 @@ enum SimulatorManager {
         let excludedSuffixes = ["Pro", "Pro Max", "Plus", "mini"]
         let excludedContains = ["SE"]
 
-        for suffix in excludedSuffixes {
-            if name.hasSuffix(suffix) {
-                return false
-            }
+        for suffix in excludedSuffixes where name.hasSuffix(suffix) {
+            return false
         }
 
-        for substring in excludedContains {
-            if name.contains(substring) {
-                return false
-            }
+        for substring in excludedContains where name.contains(substring) {
+            return false
         }
 
         return true
@@ -398,7 +395,8 @@ enum SimulatorManager {
             if case .timedOut = error {
                 Logger.error("simctl list \(command) timed out", error: error)
                 throw SimulatorManagerError.simctlFailed(
-                    reason: "simctl timed out. The CoreSimulator service may be stuck. Try: killall -9 com.apple.CoreSimulator.CoreSimulatorService",
+                    // swiftlint:disable:next line_length
+                    reason: "simctl timed out. CoreSimulator service may be stuck. Try: killall -9 com.apple.CoreSimulator.CoreSimulatorService",
                     underlyingError: error
                 )
             }

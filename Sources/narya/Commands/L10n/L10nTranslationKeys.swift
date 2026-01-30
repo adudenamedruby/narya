@@ -16,13 +16,13 @@ enum L10nTranslationKeys {
     static let baseExcluded: Set<String> = [
         "CFBundleName",
         "CFBundleDisplayName",
-        "CFBundleShortVersionString",
+        "CFBundleShortVersionString"
     ]
 
     /// Additional keys excluded only during export.
     /// These are third-party strings that shouldn't be sent for translation.
     static let exportOnlyExcluded: Set<String> = [
-        "1Password Fill Browser Action",
+        "1Password Fill Browser Action"
     ]
 
     /// All excluded keys for import operations.
@@ -44,7 +44,7 @@ enum L10nTranslationKeys {
         "NSPhotoLibraryAddUsageDescription",
         "ShortcutItemTitleNewPrivateTab",
         "ShortcutItemTitleNewTab",
-        "ShortcutItemTitleQRCode",
+        "ShortcutItemTitleQRCode"
     ]
 
     /// WidgetKit translation keys (App Store requirement for Firefox).
@@ -65,7 +65,7 @@ enum L10nTranslationKeys {
         "PzSrmZ-xRJbBP",
         "scEmjs",
         "w9jdPK",
-        "xRJbBP",
+        "xRJbBP"
     ]
 
     /// Returns the set of required translations based on configuration.

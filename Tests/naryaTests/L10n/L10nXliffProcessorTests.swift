@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// swiftlint:disable force_cast
+
 import Foundation
 import Testing
 @testable import narya
@@ -9,7 +11,6 @@ import Testing
 /// Tests for L10nXliffProcessor shared XML utilities.
 @Suite("L10nXliffProcessor Tests")
 struct L10nXliffProcessorTests {
-
     // MARK: - Test Fixtures
 
     /// Standard processor configured like ImportTask
