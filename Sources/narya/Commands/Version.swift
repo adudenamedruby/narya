@@ -24,6 +24,14 @@ struct Version: ParsableCommand {
 
     static let extensionsDir = "firefox-ios/Extensions"
 
+    // MARK: - Version Types
+
+    struct ParsedVersion {
+        let major: Int
+        let minor: Int
+        let patch: Int?
+    }
+
     // MARK: - Shared Helper Methods
 
     static func readVersion(repoRoot: URL) throws -> String {
@@ -36,14 +44,27 @@ struct Version: ParsableCommand {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    static func parseVersion(_ version: String) throws -> (major: Int, minor: Int) {
+    static func parseVersion(_ version: String) throws -> ParsedVersion {
         let components = version.split(separator: ".")
-        guard components.count == 2,
+        guard components.count == 2 || components.count == 3,
               let major = Int(components[0]),
               let minor = Int(components[1]) else {
-            throw ValidationError("Invalid version format '\(version)'. Expected X.Y where X and Y are numbers.")
+            throw ValidationError(
+                "Invalid version format '\(version)'. Expected X.Y or X.Y.Z where X, Y, and Z are numbers."
+            )
         }
-        return (major, minor)
+
+        var patch: Int?
+        if components.count == 3 {
+            guard let patchValue = Int(components[2]) else {
+                throw ValidationError(
+                    "Invalid version format '\(version)'. Expected X.Y or X.Y.Z where X, Y, and Z are numbers."
+                )
+            }
+            patch = patchValue
+        }
+
+        return ParsedVersion(major: major, minor: minor, patch: patch)
     }
 
     static func updateVersionInFiles(from currentVersion: String, to newVersion: String, repoRoot: URL) throws {

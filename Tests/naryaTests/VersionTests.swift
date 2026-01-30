@@ -136,6 +136,86 @@ struct VersionTests {
         #expect(newVersion == "147.0")
     }
 
+    @Test("bump --hotfix from X.Y creates X.Y.1")
+    func bumpHotfixFromTwoComponents() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        let versionFile = repoDir.appendingPathComponent("version.txt")
+        try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
+
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Version.Bump.parse(["--hotfix"])
+        try command.run()
+
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "145.6.1")
+    }
+
+    @Test("bump --hotfix from X.Y.Z creates X.Y.(Z+1)")
+    func bumpHotfixFromThreeComponents() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        let versionFile = repoDir.appendingPathComponent("version.txt")
+        try "145.6.2".write(to: versionFile, atomically: true, encoding: .utf8)
+
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Version.Bump.parse(["--hotfix"])
+        try command.run()
+
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "145.6.3")
+    }
+
+    @Test("bump --major from X.Y.Z drops patch and increments major")
+    func bumpMajorFromThreeComponents() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        let versionFile = repoDir.appendingPathComponent("version.txt")
+        try "145.6.2".write(to: versionFile, atomically: true, encoding: .utf8)
+
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Version.Bump.parse(["--major"])
+        try command.run()
+
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "146.0")
+    }
+
+    @Test("bump --minor from X.Y.Z drops patch and increments minor")
+    func bumpMinorFromThreeComponents() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        let versionFile = repoDir.appendingPathComponent("version.txt")
+        try "145.6.2".write(to: versionFile, atomically: true, encoding: .utf8)
+
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Version.Bump.parse(["--minor"])
+        try command.run()
+
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "145.7")
+    }
+
     @Test("bump throws when version.txt missing")
     func bumpThrowsWhenVersionFileMissing() throws {
         let repoDir = try createValidRepo()
@@ -159,10 +239,16 @@ struct VersionTests {
         }
     }
 
-    @Test("bump with both flags throws ValidationError")
-    func bumpWithBothFlagsThrows() throws {
+    @Test("bump with multiple flags throws ValidationError")
+    func bumpWithMultipleFlagsThrows() throws {
         #expect(throws: (any Error).self) {
             _ = try Version.Bump.parse(["--major", "--minor"])
+        }
+        #expect(throws: (any Error).self) {
+            _ = try Version.Bump.parse(["--major", "--hotfix"])
+        }
+        #expect(throws: (any Error).self) {
+            _ = try Version.Bump.parse(["--minor", "--hotfix"])
         }
     }
 
@@ -227,8 +313,8 @@ struct VersionTests {
         }
     }
 
-    @Test("set with three component version throws ValidationError")
-    func setWithThreeComponentsThrows() throws {
+    @Test("set with three component version works")
+    func setWithThreeComponentsWorks() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
@@ -240,6 +326,26 @@ struct VersionTests {
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.SetVersion.parse(["1.2.3"])
+        try command.run()
+
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "1.2.3")
+    }
+
+    @Test("set with four component version throws ValidationError")
+    func setWithFourComponentsThrows() throws {
+        let repoDir = try createValidRepo()
+        defer { cleanup(repoDir) }
+
+        let versionFile = repoDir.appendingPathComponent("version.txt")
+        try "145.6".write(to: versionFile, atomically: true, encoding: .utf8)
+
+        let originalDir = FileManager.default.currentDirectoryPath
+        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
+        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
+
+        var command = try Version.SetVersion.parse(["1.2.3.4"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -316,8 +422,8 @@ struct VersionTests {
         }
     }
 
-    @Test("Version with three components in version.txt throws error")
-    func threeComponentVersionThrows() throws {
+    @Test("Version with three components in version.txt works with bump")
+    func threeComponentVersionWorksWithBump() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
@@ -329,9 +435,10 @@ struct VersionTests {
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
         var command = try Version.Bump.parse(["--minor"])
+        try command.run()
 
-        #expect(throws: ValidationError.self) {
-            try command.run()
-        }
+        let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        #expect(newVersion == "1.3")
     }
 }

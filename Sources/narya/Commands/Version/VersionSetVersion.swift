@@ -12,7 +12,7 @@ extension Version {
             abstract: "Set the version number explicitly."
         )
 
-        @Argument(help: "The version to set (e.g., '123.4').")
+        @Argument(help: "The version to set (e.g., '123.4' or '123.4.1').")
         var version: String
 
         mutating func run() throws {

@@ -17,32 +17,35 @@ extension Version {
         @Flag(name: .long, help: "Bump minor version (X.Y -> X.(Y+1)).")
         var minor = false
 
+        @Flag(name: .long, help: "Bump hotfix version (X.Y -> X.Y.1, X.Y.Z -> X.Y.(Z+1)).")
+        var hotfix = false
+
         mutating func validate() throws {
-            if major && minor {
-                throw ValidationError("Cannot specify both --major and --minor. Choose one.")
+            let flagCount = [major, minor, hotfix].filter { $0 }.count
+            if flagCount > 1 {
+                throw ValidationError("Cannot specify multiple bump types. Choose one of --major, --minor, or --hotfix.")
             }
-            if !major && !minor {
-                throw ValidationError("Must specify either --major or --minor.")
+            if flagCount == 0 {
+                throw ValidationError("Must specify one of --major, --minor, or --hotfix.")
             }
         }
 
         mutating func run() throws {
             let repo = try RepoDetector.requireValidRepo()
             let currentVersion = try Version.readVersion(repoRoot: repo.root)
-            let (majorVersion, minorVersion) = try Version.parseVersion(currentVersion)
+            let parsed = try Version.parseVersion(currentVersion)
 
-            let newMajor: Int
-            let newMinor: Int
+            let newVersion: String
 
             if major {
-                newMajor = majorVersion + 1
-                newMinor = 0
+                newVersion = "\(parsed.major + 1).0"
+            } else if minor {
+                newVersion = "\(parsed.major).\(parsed.minor + 1)"
             } else {
-                newMajor = majorVersion
-                newMinor = minorVersion + 1
+                // hotfix
+                let newPatch = (parsed.patch ?? 0) + 1
+                newVersion = "\(parsed.major).\(parsed.minor).\(newPatch)"
             }
-
-            let newVersion = "\(newMajor).\(newMinor)"
 
             Herald.declare("Bumping version: \(currentVersion) -> \(newVersion)", isNewCommand: true)
             try Version.updateVersionInFiles(from: currentVersion, to: newVersion, repoRoot: repo.root)
