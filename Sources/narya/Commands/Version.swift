@@ -8,7 +8,7 @@ import Foundation
 struct Version: ParsableCommand {
     static let configuration = CommandConfiguration(
         abstract: "Display or update the version number in the firefox-ios repository.",
-        subcommands: [Show.self, Bump.self, SetVersion.self, Verify.self]
+        subcommands: [Show.self, Bump.self, SetVersion.self, Verify.self, ListFiles.self]
     )
 
     // MARK: - Constants
