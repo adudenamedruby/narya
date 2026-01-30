@@ -32,16 +32,16 @@ struct VersionTests {
         #expect(!abstract.isEmpty)
     }
 
-    @Test("Discussion text is defined")
-    func commandHasDiscussion() {
-        // Discussion can be empty for simple commands
-        _ = Version.configuration.discussion
+    @Test("Command has subcommands configured")
+    func commandHasSubcommands() {
+        let subcommands = Version.configuration.subcommands
+        #expect(subcommands.count == 4)
     }
 
-    // MARK: - Default Behavior Tests (Print Version)
+    // MARK: - Show Tests
 
-    @Test("run without flags prints version and git sha")
-    func runWithoutFlagsPrintsVersion() throws {
+    @Test("show prints version and git sha")
+    func showPrintsVersion() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
@@ -53,13 +53,13 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse([])
+        var command = try Version.Show.parse([])
         // Should not throw - just prints version
         try command.run()
     }
 
-    @Test("run without flags throws when version.txt missing")
-    func runThrowsWhenVersionFileMissing() throws {
+    @Test("show throws when version.txt missing")
+    func showThrowsWhenVersionFileMissing() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
 
@@ -67,28 +67,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse([])
-
-        #expect(throws: ValidationError.self) {
-            try command.run()
-        }
-    }
-
-    // MARK: - Conflicting Options Tests
-
-    @Test("run with multiple options throws ValidationError")
-    func runWithMultipleOptionsThrows() throws {
-        let repoDir = try createValidRepo()
-        defer { cleanup(repoDir) }
-
-        let versionFile = repoDir.appendingPathComponent("version.txt")
-        try "145.0".write(to: versionFile, atomically: true, encoding: .utf8)
-
-        let originalDir = FileManager.default.currentDirectoryPath
-        FileManager.default.changeCurrentDirectoryPath(repoDir.path)
-        defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
-
-        var command = try Version.parse(["--bump", "major", "--verify"])
+        var command = try Version.Show.parse([])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -97,7 +76,7 @@ struct VersionTests {
 
     // MARK: - Bump Version Tests
 
-    @Test("bump major increments major version and resets minor")
+    @Test("bump --major increments major version and resets minor")
     func bumpMajorIncrementsVersion() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
@@ -109,7 +88,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "major"])
+        var command = try Version.Bump.parse(["--major"])
         try command.run()
 
         let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
@@ -117,7 +96,7 @@ struct VersionTests {
         #expect(newVersion == "146.0")
     }
 
-    @Test("bump minor increments minor version")
+    @Test("bump --minor increments minor version")
     func bumpMinorIncrementsVersion() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
@@ -129,7 +108,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "minor"])
+        var command = try Version.Bump.parse(["--minor"])
         try command.run()
 
         let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
@@ -137,7 +116,7 @@ struct VersionTests {
         #expect(newVersion == "145.7")
     }
 
-    @Test("bump major on X.0 version increments correctly")
+    @Test("bump --major on X.0 version increments correctly")
     func bumpMajorOnZeroMinor() throws {
         let repoDir = try createValidRepo()
         defer { cleanup(repoDir) }
@@ -149,7 +128,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "major"])
+        var command = try Version.Bump.parse(["--major"])
         try command.run()
 
         let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
@@ -166,10 +145,24 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "major"])
+        var command = try Version.Bump.parse(["--major"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
+        }
+    }
+
+    @Test("bump without flags throws ValidationError")
+    func bumpWithoutFlagsThrows() throws {
+        #expect(throws: (any Error).self) {
+            _ = try Version.Bump.parse([])
+        }
+    }
+
+    @Test("bump with both flags throws ValidationError")
+    func bumpWithBothFlagsThrows() throws {
+        #expect(throws: (any Error).self) {
+            _ = try Version.Bump.parse(["--major", "--minor"])
         }
     }
 
@@ -187,7 +180,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--set", "150.0"])
+        var command = try Version.SetVersion.parse(["150.0"])
         try command.run()
 
         let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
@@ -207,7 +200,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--set", "145.6"])
+        var command = try Version.SetVersion.parse(["145.6"])
         try command.run()
 
         let newVersion = try String(contentsOf: versionFile, encoding: .utf8)
@@ -227,7 +220,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--set", "invalid"])
+        var command = try Version.SetVersion.parse(["invalid"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -246,7 +239,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--set", "1.2.3"])
+        var command = try Version.SetVersion.parse(["1.2.3"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -281,7 +274,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--verify"])
+        var command = try Version.Verify.parse([])
         // Should not throw when consistent
         try command.run()
     }
@@ -295,7 +288,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--verify"])
+        var command = try Version.Verify.parse([])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -316,7 +309,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "major"])
+        var command = try Version.Bump.parse(["--major"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
@@ -335,7 +328,7 @@ struct VersionTests {
         FileManager.default.changeCurrentDirectoryPath(repoDir.path)
         defer { FileManager.default.changeCurrentDirectoryPath(originalDir) }
 
-        var command = try Version.parse(["--bump", "minor"])
+        var command = try Version.Bump.parse(["--minor"])
 
         #expect(throws: ValidationError.self) {
             try command.run()
