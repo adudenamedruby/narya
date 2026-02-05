@@ -4,8 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -14,9 +12,6 @@ permissions:
 jobs:
   test-commands:
     runs-on: macos-15
-    
-    env:
-      FXIOS_BIN: $GITHUB_WORKSPACE/.build/debug/fxios
 
     steps:
       - name: Checkout fxios-ctl
@@ -43,33 +38,33 @@ jobs:
       - name: Verify fxios build
         run: |
           ls -la .build/debug/
-          $FXIOS_BIN --version
+          .build/debug/fxios --version
 
       - name: Test fxios help command
         working-directory: firefox-ios
         run: |
-          $FXIOS_BIN help
+          ${{ github.workspace }}/.build/debug/fxios help
 
     #   - name: Test fxios doctor
     #     working-directory: firefox-ios
     #     run: |
-    #       $FXIOS_BIN doctor
+    #       ${{ github.workspace }}/.build/debug/fxios doctor
 
     #   - name: Test fxios bootstrap --all
     #     working-directory: firefox-ios
     #     run: |
     #       echo "Running fxios bootstrap --all in firefox-ios directory"
     #       pwd
-    #       $FXIOS_BIN bootstrap --all
+    #       ${{ github.workspace }}/.build/debug/fxios bootstrap --all
 
     #   - name: Test fxios lint run
     #     working-directory: firefox-ios
     #     run: |
     #       echo "Running fxios lint run in firefox-ios directory"
     #       pwd
-    #       $FXIOS_BIN lint run
+    #       ${{ github.workspace }}/.build/debug/fxios lint run
 
     #   - name: Test fxios version
     #     working-directory: firefox-ios
     #     run: |
-    #       $FXIOS_BIN version
+    #       ${{ github.workspace }}/.build/debug/fxios version
