@@ -1,0 +1,73 @@
+name: Test Commands
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-commands:
+    runs-on: macos-15
+    
+    env:
+      FXIOS_BIN: $GITHUB_WORKSPACE/.build/debug/fxios
+
+    steps:
+      - name: Checkout fxios-ctl
+        uses: actions/checkout@v4
+
+      - name: Install Swift 6.2.0
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.2.0"
+
+      - name: Verify Swift
+        run: swift --version
+
+      - name: Build fxios tool (debug)
+        run: |
+          swift build
+
+      - name: Checkout firefox-ios repository
+        uses: actions/checkout@v4
+        with:
+          repository: mozilla-mobile/firefox-ios
+          path: firefox-ios
+
+      - name: Verify fxios build
+        run: |
+          ls -la .build/debug/
+          $FXIOS_BIN --version
+
+      - name: Test fxios help command
+        working-directory: firefox-ios
+        run: |
+          $FXIOS_BIN help
+
+    #   - name: Test fxios doctor
+    #     working-directory: firefox-ios
+    #     run: |
+    #       $FXIOS_BIN doctor
+
+    #   - name: Test fxios bootstrap --all
+    #     working-directory: firefox-ios
+    #     run: |
+    #       echo "Running fxios bootstrap --all in firefox-ios directory"
+    #       pwd
+    #       $FXIOS_BIN bootstrap --all
+
+    #   - name: Test fxios lint run
+    #     working-directory: firefox-ios
+    #     run: |
+    #       echo "Running fxios lint run in firefox-ios directory"
+    #       pwd
+    #       $FXIOS_BIN lint run
+
+    #   - name: Test fxios version
+    #     working-directory: firefox-ios
+    #     run: |
+    #       $FXIOS_BIN version
