@@ -1,15 +1,48 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*"
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
+  create-tag:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/v')
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create and push tag
+        id: tag
+        run: |
+          # Extract version from branch name (release/v20260205.0 -> v20260205.0)
+          TAG="${GITHUB_HEAD_REF#release/}"
+
+          # Check tag doesn't already exist
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Error: git tag '${TAG}' already exists"
+            exit 1
+          fi
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Create and push tag
+          git tag "${TAG}"
+          git push origin "${TAG}"
+
+          echo "Created and pushed tag: ${TAG}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
   build-macos:
+    needs: create-tag
     strategy:
       matrix:
         include:
@@ -32,8 +65,7 @@ jobs:
         run: swift --version
 
       - name: Build (release)
-        run: |
-          swift build -c release --arch ${{ matrix.arch }}
+        run: swift build -c release --arch ${{ matrix.arch }}
 
       - name: Package
         run: |
@@ -43,7 +75,7 @@ jobs:
           cp ".build/release/$BIN_NAME" "$OUT_DIR/$BIN_NAME"
           chmod +x "$OUT_DIR/$BIN_NAME"
 
-          VERSION="${GITHUB_REF_NAME}" # e.g. v0.1.0
+          VERSION="${{ needs.create-tag.outputs.tag }}"
           TARBALL="fxios-${VERSION}-macos-${{ matrix.arch }}.tar.gz"
           tar -C "$OUT_DIR" -czf "$TARBALL" "$BIN_NAME"
           shasum -a 256 "$TARBALL" | tee "${TARBALL}.sha256"
@@ -51,6 +83,7 @@ jobs:
       - name: Upload assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.create-tag.outputs.tag }}
           files: |
             fxios-*.tar.gz
             fxios-*.tar.gz.sha256
