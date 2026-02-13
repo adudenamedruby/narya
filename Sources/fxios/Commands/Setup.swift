@@ -10,8 +10,20 @@ struct Setup: ParsableCommand {
         abstract: "Clone and bootstrap the firefox-ios repository."
     )
 
-    @Flag(name: .long, help: "Use HTTPS URL for cloning (https://github.com/...) instead of SSH.")
-    var https = false
+    enum CloneProtocol: EnumerableFlag {
+        case https
+        case ssh
+
+        static func name(for value: CloneProtocol) -> NameSpecification {
+            .long
+        }
+    }
+
+    @Flag(help: "Protocol to use for git URLs.")
+    var cloneProtocol: CloneProtocol
+
+    @Option(name: .long, help: "Full URL of your fork. Clones the fork as 'origin' and adds mozilla-mobile as 'upstream'.")
+    var withFork: String?
 
     @Option(name: .long, help: "Directory path (absolute or relative) to clone into. Defaults to current directory.")
     var location: String?
@@ -28,11 +40,12 @@ struct Setup: ParsableCommand {
         try ToolChecker.requireNode()
         try ToolChecker.requireNpm()
 
-        let repoURL = https
+        let mozillaURL = cloneProtocol == .https
             ? "https://github.com/mozilla-mobile/firefox-ios.git"
             : "git@github.com:mozilla-mobile/firefox-ios.git"
 
-        // Determine the clone destination
+        // Determine the clone URL and destination
+        let cloneURL = withFork ?? mozillaURL
         let cloneDir: String
         if let location = location {
             cloneDir = location
@@ -40,7 +53,7 @@ struct Setup: ParsableCommand {
             cloneDir = "firefox-ios"
         }
 
-        var arguments = ["clone", repoURL]
+        var arguments = ["clone", cloneURL]
         if let location = location {
             arguments.append(location)
         }
@@ -55,6 +68,16 @@ struct Setup: ParsableCommand {
             throw SetupError.failedToChangeDirectory(clonePath.path)
         }
 
+        // If using a fork, add the mozilla-mobile repo as upstream
+        if withFork != nil {
+            Herald.declare("Adding mozilla-mobile as upstream remote...")
+            do {
+                try ShellRunner.run("git", arguments: ["remote", "add", "upstream", mozillaURL])
+            } catch {
+                throw SetupError.failedToAddUpstreamRemote
+            }
+        }
+
         Herald.declare("Running bootstrap in \(clonePath.path)...")
 
         // Run bootstrap
@@ -67,11 +90,14 @@ struct Setup: ParsableCommand {
 
 enum SetupError: Error, CustomStringConvertible {
     case failedToChangeDirectory(String)
+    case failedToAddUpstreamRemote
 
     var description: String {
         switch self {
         case .failedToChangeDirectory(let path):
             return "Failed to change directory to \(path)."
+        case .failedToAddUpstreamRemote:
+            return "Failed to add upstream remote for mozilla-mobile/firefox-ios."
         }
     }
 }

@@ -14,6 +14,13 @@ struct SetupTests {
         #expect(error.description.contains("/some/path"))
         #expect(error.description.contains("Failed to change directory"))
     }
+
+    @Test("SetupError.failedToAddUpstreamRemote has correct description")
+    func failedToAddUpstreamRemoteDescription() {
+        let error = SetupError.failedToAddUpstreamRemote
+        #expect(error.description.contains("upstream"))
+        #expect(error.description.contains("Failed to add"))
+    }
 }
 
 @Suite("ToolChecker Tests")
